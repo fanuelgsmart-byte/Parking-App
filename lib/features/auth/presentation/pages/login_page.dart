@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:parkflow_manager/core/constants/app_constants.dart';
+import 'package:parkflow_manager/core/utils/validators.dart';
 import 'package:parkflow_manager/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:parkflow_manager/features/auth/presentation/bloc/auth_event.dart';
 import 'package:parkflow_manager/features/auth/presentation/bloc/auth_state.dart';
@@ -79,15 +80,7 @@ class _LoginPageState extends State<LoginPage> {
                         labelText: 'Email',
                         prefixIcon: Icon(Icons.email_outlined),
                       ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter your email';
-                        }
-                        if (!value.contains('@')) {
-                          return 'Please enter a valid email';
-                        }
-                        return null;
-                      },
+                      validator: Validators.email,
                     ),
                     const SizedBox(height: 16),
                     TextFormField(
@@ -109,15 +102,7 @@ class _LoginPageState extends State<LoginPage> {
                           },
                         ),
                       ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter your password';
-                        }
-                        if (value.length < 6) {
-                          return 'Password must be at least 6 characters';
-                        }
-                        return null;
-                      },
+                      validator: Validators.password,
                     ),
                     const SizedBox(height: 32),
                     BlocBuilder<AuthBloc, AuthState>(

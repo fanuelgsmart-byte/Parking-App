@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:parkflow_manager/core/utils/validators.dart';
 import 'package:parkflow_manager/core/widgets/loading_indicator.dart';
 import 'package:parkflow_manager/features/employee_management/domain/entities/employee.dart';
 import 'package:parkflow_manager/features/employee_management/presentation/bloc/employee_cubit.dart';
@@ -74,6 +75,7 @@ class _EmployeeManagementPageState extends State<EmployeeManagementPage> {
   }
 
   void _showAddEmployeeDialog(BuildContext context) {
+    final formKey = GlobalKey<FormState>();
     final nameController = TextEditingController();
     final emailController = TextEditingController();
     String selectedRole = 'employee';
@@ -83,46 +85,51 @@ class _EmployeeManagementPageState extends State<EmployeeManagementPage> {
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDialogState) => AlertDialog(
           title: const Text('Add Employee'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: nameController,
-                decoration: const InputDecoration(
-                  labelText: 'Full Name',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: emailController,
-                decoration: const InputDecoration(
-                  labelText: 'Email',
-                  border: OutlineInputBorder(),
-                ),
-                keyboardType: TextInputType.emailAddress,
-              ),
-              const SizedBox(height: 12),
-              DropdownButtonFormField<String>(
-                value: selectedRole,
-                decoration: const InputDecoration(
-                  labelText: 'Role',
-                  border: OutlineInputBorder(),
-                ),
-                items: const [
-                  DropdownMenuItem(
-                    value: 'employee',
-                    child: Text('Employee'),
+          content: Form(
+            key: formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextFormField(
+                  controller: nameController,
+                  decoration: const InputDecoration(
+                    labelText: 'Full Name',
+                    border: OutlineInputBorder(),
                   ),
-                  DropdownMenuItem(
-                    value: 'manager',
-                    child: Text('Manager'),
+                  validator: Validators.name,
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: emailController,
+                  decoration: const InputDecoration(
+                    labelText: 'Email',
+                    border: OutlineInputBorder(),
                   ),
-                ],
-                onChanged: (val) =>
-                    setDialogState(() => selectedRole = val ?? 'employee'),
-              ),
-            ],
+                  keyboardType: TextInputType.emailAddress,
+                  validator: Validators.email,
+                ),
+                const SizedBox(height: 12),
+                DropdownButtonFormField<String>(
+                  value: selectedRole,
+                  decoration: const InputDecoration(
+                    labelText: 'Role',
+                    border: OutlineInputBorder(),
+                  ),
+                  items: const [
+                    DropdownMenuItem(
+                      value: 'employee',
+                      child: Text('Employee'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'manager',
+                      child: Text('Manager'),
+                    ),
+                  ],
+                  onChanged: (val) =>
+                      setDialogState(() => selectedRole = val ?? 'employee'),
+                ),
+              ],
+            ),
           ),
           actions: [
             TextButton(
@@ -131,6 +138,7 @@ class _EmployeeManagementPageState extends State<EmployeeManagementPage> {
             ),
             FilledButton(
               onPressed: () {
+                if (!formKey.currentState!.validate()) return;
                 Navigator.of(ctx).pop();
                 final employee = Employee(
                   id: '',

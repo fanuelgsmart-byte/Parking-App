@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:parkflow_manager/features/parking_session/domain/entities/parking_session.dart';
+import 'package:parkflow_manager/features/parking_session/domain/repositories/parking_session_repository.dart';
 import 'package:parkflow_manager/features/parking_session/domain/usecases/get_active_sessions.dart';
 
 // ──────────────────────────── State ────────────────────────────
@@ -29,6 +32,15 @@ class SessionLoaded extends SessionState {
   List<Object?> get props => [sessions];
 }
 
+class SessionCreated extends SessionState {
+  final ParkingSession session;
+
+  const SessionCreated({required this.session});
+
+  @override
+  List<Object?> get props => [session];
+}
+
 class SessionError extends SessionState {
   final String message;
 
@@ -42,16 +54,72 @@ class SessionError extends SessionState {
 
 class SessionCubit extends Cubit<SessionState> {
   final GetActiveSessions getActiveSessions;
+  final ParkingSessionRepository repository;
 
-  SessionCubit({required this.getActiveSessions})
-      : super(const SessionInitial());
+  StreamSubscription<List<ParkingSession>>? _watchSub;
+  String? _currentLotId;
+
+  SessionCubit({
+    required this.getActiveSessions,
+    required this.repository,
+  }) : super(const SessionInitial());
 
   Future<void> loadActiveSessions(String lotId) async {
+    _currentLotId = lotId;
     emit(const SessionLoading());
     final result = await getActiveSessions(lotId);
     result.fold(
       (failure) => emit(SessionError(message: failure.message)),
       (sessions) => emit(SessionLoaded(sessions: sessions)),
     );
+  }
+
+  /// Subscribe to real-time spot/session updates via Drift streams.
+  void watchSessions(String lotId) {
+    _currentLotId = lotId;
+    _watchSub?.cancel();
+    _watchSub = repository.watchActiveSessions(lotId).listen(
+      (sessions) => emit(SessionLoaded(sessions: sessions)),
+      onError: (e) => emit(SessionError(message: e.toString())),
+    );
+  }
+
+  Future<void> createSession({
+    required String licensePlate,
+    required String vehicleSize,
+    required String vehicleColor,
+    required int spotId,
+    required String lotId,
+    required String employeeId,
+  }) async {
+    emit(const SessionLoading());
+    final result = await repository.createSession(
+      licensePlate: licensePlate,
+      vehicleSize: vehicleSize,
+      vehicleColor: vehicleColor,
+      spotId: spotId,
+      lotId: lotId,
+      employeeId: employeeId,
+    );
+
+    result.fold(
+      (failure) => emit(SessionError(message: failure.message)),
+      (session) {
+        emit(SessionCreated(session: session));
+        // Reload the full list
+        if (_currentLotId != null) loadActiveSessions(_currentLotId!);
+      },
+    );
+  }
+
+  Future<void> flagForCheckout(int sessionId) async {
+    await repository.flagForCheckout(sessionId);
+    if (_currentLotId != null) await loadActiveSessions(_currentLotId!);
+  }
+
+  @override
+  Future<void> close() {
+    _watchSub?.cancel();
+    return super.close();
   }
 }

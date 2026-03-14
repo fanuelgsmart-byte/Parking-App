@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:go_router/go_router.dart';
+import 'package:parkflow_manager/core/services/pdf_report_service.dart';
 import 'package:parkflow_manager/core/widgets/error_display.dart';
 import 'package:parkflow_manager/core/widgets/loading_indicator.dart';
 import 'package:parkflow_manager/features/auth/presentation/bloc/auth_bloc.dart';
@@ -18,6 +20,50 @@ class ManagerDashboardPage extends StatefulWidget {
 
 class _ManagerDashboardPageState extends State<ManagerDashboardPage> {
   int _selectedIndex = 0;
+  final PdfReportService _pdfService = PdfReportService();
+
+  Future<void> _exportCurrentReport(BuildContext context) async {
+    final state = context.read<ReportsCubit>().state;
+
+    String? filePath;
+    try {
+      if (state is RevenueReportLoaded) {
+        filePath = await _pdfService.generateRevenueReport(state.report);
+      } else if (state is OccupancyReportLoaded) {
+        filePath = await _pdfService.generateOccupancyReport(state.report);
+      } else {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Generate a report first before exporting'),
+            ),
+          );
+        }
+        return;
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Export failed: $e')),
+        );
+      }
+      return;
+    }
+
+    if (filePath != null && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('PDF exported: ${filePath.split('/').last}'),
+          action: SnackBarAction(
+            label: 'Open',
+            onPressed: () {
+              // In production, use open_file or share_plus to open the PDF
+            },
+          ),
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,11 +72,14 @@ class _ManagerDashboardPageState extends State<ManagerDashboardPage> {
         title: const Text('Manager Dashboard'),
         actions: [
           IconButton(
+            icon: const Icon(Icons.people),
+            tooltip: 'Manage Employees',
+            onPressed: () => context.goNamed('employee-management'),
+          ),
+          IconButton(
             icon: const Icon(Icons.picture_as_pdf),
             tooltip: 'Export PDF',
-            onPressed: () {
-              // PDF export will be triggered here
-            },
+            onPressed: () => _exportCurrentReport(context),
           ),
           IconButton(
             icon: const Icon(Icons.logout),

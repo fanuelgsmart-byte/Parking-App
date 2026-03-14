@@ -6,6 +6,7 @@ import 'package:parkflow_manager/features/auth/presentation/pages/login_page.dar
 import 'package:parkflow_manager/features/employee_management/presentation/pages/employee_management_page.dart';
 import 'package:parkflow_manager/features/parking_session/presentation/pages/employee_dashboard_page.dart';
 import 'package:parkflow_manager/features/reports/presentation/pages/manager_dashboard_page.dart';
+import 'package:parkflow_manager/features/reports/presentation/pages/rate_config_page.dart';
 import 'package:parkflow_manager/features/lot_map/presentation/pages/lot_map_page.dart';
 import 'package:parkflow_manager/features/payment/presentation/pages/checkout_page.dart';
 
@@ -64,12 +65,22 @@ class AppRouter {
             path: 'employees',
             name: 'employee-management',
             builder: (context, state) {
-              // lotId comes from the authenticated user's assigned lot
               final authState = authBloc.state;
               final lotId = authState is AuthAuthenticated
                   ? (authState.user.assignedLotId ?? 'default')
                   : 'default';
               return EmployeeManagementPage(lotId: lotId);
+            },
+          ),
+          GoRoute(
+            path: 'rates',
+            name: 'rate-config',
+            builder: (context, state) {
+              final authState = authBloc.state;
+              final lotId = authState is AuthAuthenticated
+                  ? (authState.user.assignedLotId ?? 'default')
+                  : 'default';
+              return RateConfigPage(lotId: lotId);
             },
           ),
         ],

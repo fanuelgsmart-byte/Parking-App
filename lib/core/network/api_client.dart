@@ -6,16 +6,19 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:parkflow_manager/core/constants/api_constants.dart';
 import 'package:parkflow_manager/core/error/exceptions.dart';
+import 'package:parkflow_manager/core/security/request_signer.dart';
 
 class ApiClient {
   late final Dio _dio;
   final FlutterSecureStorage _secureStorage;
+  late final RequestSigner _requestSigner;
 
   /// Tracks consecutive refresh failures to prevent infinite retry loops.
   bool _isRefreshing = false;
 
   ApiClient({required FlutterSecureStorage secureStorage})
-      : _secureStorage = secureStorage {
+      : _secureStorage = secureStorage,
+        _requestSigner = RequestSigner(secureStorage: secureStorage) {
     _dio = Dio(
       BaseOptions(
         baseUrl: ApiConstants.baseUrl,
@@ -35,6 +38,7 @@ class ApiClient {
 
     _dio.interceptors.addAll([
       _authInterceptor(),
+      _hmacSigningInterceptor(),
       _retryInterceptor(),
       // Only log in debug builds — prevents token leakage in production
       if (kDebugMode)
@@ -89,6 +93,27 @@ class ApiClient {
       result |= a[i] ^ b[i];
     }
     return result == 0;
+  }
+
+  // ──────────────────── HMAC Signing Interceptor ────────────────────
+
+  InterceptorsWrapper _hmacSigningInterceptor() {
+    return InterceptorsWrapper(
+      onRequest: (options, handler) async {
+        if (_requestSigner.shouldSign(
+          options.method,
+          options.path,
+        )) {
+          final headers = await _requestSigner.sign(
+            method: options.method,
+            path: options.path,
+            body: options.data,
+          );
+          options.headers.addAll(headers);
+        }
+        handler.next(options);
+      },
+    );
   }
 
   // ──────────────────── Auth Interceptor ────────────────────

@@ -1,0 +1,94 @@
+name: parkflow_manager
+description: ParkFlow Manager - Parking Lot Management System
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.10.0 <4.0.0'
+  flutter: '>=3.38.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # State Management
+  flutter_bloc: ^9.1.0
+  bloc: ^9.0.0
+  equatable: ^2.0.7
+
+  # Navigation
+  go_router: ^15.1.0
+
+  # Networking
+  dio: ^5.8.0
+
+  # Local Database
+  drift: ^2.25.0
+  sqlite3_flutter_libs: ^0.5.28
+  sqlcipher_flutter_libs: ^0.6.5
+
+  # Dependency Injection
+  get_it: ^8.0.3
+  injectable: ^2.5.0
+
+  # Data Models
+  freezed_annotation: ^3.0.0
+  json_annotation: ^4.9.0
+
+  # Security
+  flutter_secure_storage: ^9.2.4
+  local_auth: ^2.3.0
+
+  # Connectivity
+  connectivity_plus: ^6.1.4
+
+  # Charts
+  fl_chart: ^0.70.2
+
+  # PDF
+  pdf: ^3.11.3
+  printing: ^5.14.0
+
+  # Firebase
+  firebase_core: ^3.12.1
+  firebase_messaging: ^15.2.4
+
+  # UI
+  cupertino_icons: ^1.0.8
+  google_fonts: ^6.2.1
+  shimmer: ^3.0.0
+  cached_network_image: ^3.4.1
+  flutter_svg: ^2.1.0
+
+  # Utilities
+  intl: ^0.20.2
+  path_provider: ^2.1.5
+  path: ^1.9.1
+  logger: ^2.5.0
+  uuid: ^4.5.1
+  rxdart: ^0.28.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  # Code Generation
+  build_runner: ^2.4.14
+  freezed: ^3.0.0
+  json_serializable: ^6.9.4
+  drift_dev: ^2.25.0
+  injectable_generator: ^2.7.0
+
+  # Linting
+  flutter_lints: ^5.0.0
+
+  # Testing
+  bloc_test: ^10.0.0
+  mocktail: ^1.0.4
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/images/
+    - assets/fonts/

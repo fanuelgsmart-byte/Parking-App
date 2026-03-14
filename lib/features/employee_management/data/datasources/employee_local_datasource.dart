@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart';
+import 'package:injectable/injectable.dart';
 import 'package:parkflow_manager/core/database/app_database.dart';
 import 'package:parkflow_manager/core/error/exceptions.dart';
 import 'package:parkflow_manager/features/employee_management/domain/entities/employee.dart';
@@ -12,6 +13,7 @@ abstract class EmployeeLocalDataSource {
   Future<void> upsertEmployees(List<Employee> employees);
 }
 
+@Injectable(as: EmployeeLocalDataSource)
 class EmployeeLocalDataSourceImpl implements EmployeeLocalDataSource {
   final AppDatabase database;
 

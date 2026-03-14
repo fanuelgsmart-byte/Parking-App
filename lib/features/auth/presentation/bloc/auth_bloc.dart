@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:injectable/injectable.dart';
 import 'package:parkflow_manager/core/security/login_throttle.dart';
 import 'package:parkflow_manager/core/utils/usecase.dart';
 import 'package:parkflow_manager/features/auth/domain/usecases/login_usecase.dart';
@@ -7,6 +8,7 @@ import 'package:parkflow_manager/features/auth/domain/repositories/auth_reposito
 import 'package:parkflow_manager/features/auth/presentation/bloc/auth_event.dart';
 import 'package:parkflow_manager/features/auth/presentation/bloc/auth_state.dart';
 
+@injectable
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final LoginUseCase loginUseCase;
   final LogoutUseCase logoutUseCase;

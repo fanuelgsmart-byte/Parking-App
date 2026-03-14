@@ -1,3 +1,4 @@
+import 'package:injectable/injectable.dart';
 import 'package:parkflow_manager/core/database/app_database.dart';
 import 'package:parkflow_manager/core/error/failures.dart';
 import 'package:parkflow_manager/core/utils/either.dart';
@@ -6,6 +7,7 @@ import 'package:parkflow_manager/features/reports/domain/entities/occupancy_repo
 import 'package:parkflow_manager/features/reports/domain/entities/revenue_report.dart';
 import 'package:parkflow_manager/features/reports/domain/repositories/report_repository.dart';
 
+@Injectable(as: ReportRepository)
 class ReportRepositoryImpl implements ReportRepository {
   final ReportLocalDataSource localDataSource;
   final AppDatabase database;

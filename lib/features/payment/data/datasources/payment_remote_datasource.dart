@@ -1,3 +1,4 @@
+import 'package:injectable/injectable.dart';
 import 'package:parkflow_manager/core/constants/api_constants.dart';
 import 'package:parkflow_manager/core/error/exceptions.dart';
 import 'package:parkflow_manager/core/network/api_client.dart';
@@ -9,6 +10,7 @@ abstract class PaymentRemoteDataSource {
   Future<PaymentModel> submitPayment(Map<String, dynamic> data);
 }
 
+@Injectable(as: PaymentRemoteDataSource)
 class PaymentRemoteDataSourceImpl implements PaymentRemoteDataSource {
   final ApiClient apiClient;
 

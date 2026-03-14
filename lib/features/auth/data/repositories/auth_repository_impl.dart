@@ -1,3 +1,4 @@
+import 'package:injectable/injectable.dart';
 import 'package:parkflow_manager/core/error/exceptions.dart';
 import 'package:parkflow_manager/core/error/failures.dart';
 import 'package:parkflow_manager/core/network/network_info.dart';
@@ -7,6 +8,7 @@ import 'package:parkflow_manager/features/auth/data/datasources/auth_remote_data
 import 'package:parkflow_manager/features/auth/domain/entities/user.dart';
 import 'package:parkflow_manager/features/auth/domain/repositories/auth_repository.dart';
 
+@Injectable(as: AuthRepository)
 class AuthRepositoryImpl implements AuthRepository {
   final AuthRemoteDataSource remoteDataSource;
   final AuthLocalDataSource localDataSource;

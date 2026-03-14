@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:injectable/injectable.dart';
 import 'package:parkflow_manager/features/parking_session/domain/entities/parking_session.dart';
 import 'package:parkflow_manager/features/parking_session/domain/repositories/parking_session_repository.dart';
 import 'package:parkflow_manager/features/parking_session/domain/usecases/get_active_sessions.dart';
@@ -52,6 +53,7 @@ class SessionError extends SessionState {
 
 // ──────────────────────────── Cubit ────────────────────────────
 
+@injectable
 class SessionCubit extends Cubit<SessionState> {
   final GetActiveSessions getActiveSessions;
   final ParkingSessionRepository repository;

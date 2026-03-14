@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:injectable/injectable.dart';
 import 'package:parkflow_manager/features/employee_management/domain/entities/employee.dart';
 import 'package:parkflow_manager/features/employee_management/domain/repositories/employee_repository.dart';
 
@@ -58,6 +59,7 @@ class EmployeeError extends EmployeeState {
 
 // ──────────────────────────── Cubit ────────────────────────────
 
+@injectable
 class EmployeeCubit extends Cubit<EmployeeState> {
   final EmployeeRepository repository;
   String? _currentLotId;

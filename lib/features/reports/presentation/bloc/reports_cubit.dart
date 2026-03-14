@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:injectable/injectable.dart';
 import 'package:parkflow_manager/features/reports/domain/entities/occupancy_report.dart';
 import 'package:parkflow_manager/features/reports/domain/entities/revenue_report.dart';
 import 'package:parkflow_manager/features/reports/domain/repositories/report_repository.dart';
@@ -59,6 +60,7 @@ class ReportsError extends ReportsState {
 
 // ──────────────────────────── Cubit ────────────────────────────
 
+@injectable
 class ReportsCubit extends Cubit<ReportsState> {
   final ReportRepository reportRepository;
 

@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:injectable/injectable.dart';
 import 'package:parkflow_manager/features/parking_session/domain/entities/parking_session.dart';
 import 'package:parkflow_manager/features/parking_session/domain/repositories/parking_session_repository.dart';
 import 'package:parkflow_manager/features/payment/domain/entities/payment.dart';
@@ -112,6 +113,7 @@ class CheckoutError extends CheckoutState {
 
 // ──────────────────────────── BLoC ────────────────────────────
 
+@injectable
 class CheckoutBloc extends Bloc<CheckoutEvent, CheckoutState> {
   final ParkingSessionRepository sessionRepository;
   final PaymentRepository paymentRepository;

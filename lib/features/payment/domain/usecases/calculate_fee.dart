@@ -1,5 +1,7 @@
+import 'package:injectable/injectable.dart';
 import 'package:parkflow_manager/features/parking_session/domain/entities/parking_session.dart';
 
+@injectable
 class CalculateFee {
   /// Calculates the parking fee based on duration and vehicle-size rate.
   /// Returns the fee in the base currency unit.

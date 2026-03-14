@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:drift/drift.dart';
+import 'package:injectable/injectable.dart';
 import 'package:parkflow_manager/core/database/app_database.dart';
 import 'package:parkflow_manager/core/error/exceptions.dart';
 import 'package:parkflow_manager/core/error/failures.dart';
@@ -12,6 +13,7 @@ import 'package:parkflow_manager/features/payment/data/models/payment_model.dart
 import 'package:parkflow_manager/features/payment/domain/entities/payment.dart';
 import 'package:parkflow_manager/features/payment/domain/repositories/payment_repository.dart';
 
+@Injectable(as: PaymentRepository)
 class PaymentRepositoryImpl implements PaymentRepository {
   final PaymentLocalDataSource localDataSource;
   final PaymentRemoteDataSource remoteDataSource;

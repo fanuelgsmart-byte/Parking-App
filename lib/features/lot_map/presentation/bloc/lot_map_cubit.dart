@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:injectable/injectable.dart';
 import 'package:parkflow_manager/features/lot_map/domain/entities/parking_spot.dart';
 import 'package:parkflow_manager/features/lot_map/domain/repositories/lot_repository.dart';
 
@@ -48,6 +49,7 @@ class LotMapError extends LotMapState {
 
 // ──────────────────────────── Cubit ────────────────────────────
 
+@injectable
 class LotMapCubit extends Cubit<LotMapState> {
   final LotRepository lotRepository;
   StreamSubscription<List<ParkingSpot>>? _spotsSubscription;

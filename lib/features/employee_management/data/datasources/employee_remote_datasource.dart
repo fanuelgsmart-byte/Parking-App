@@ -1,3 +1,4 @@
+import 'package:injectable/injectable.dart';
 import 'package:parkflow_manager/core/constants/api_constants.dart';
 import 'package:parkflow_manager/core/error/exceptions.dart';
 import 'package:parkflow_manager/core/network/api_client.dart';
@@ -10,6 +11,7 @@ abstract class EmployeeRemoteDataSource {
   Future<void> deactivateEmployee(String id);
 }
 
+@Injectable(as: EmployeeRemoteDataSource)
 class EmployeeRemoteDataSourceImpl implements EmployeeRemoteDataSource {
   final ApiClient apiClient;
 

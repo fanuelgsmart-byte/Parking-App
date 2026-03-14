@@ -1,3 +1,4 @@
+import 'package:injectable/injectable.dart';
 import 'package:parkflow_manager/core/error/exceptions.dart';
 import 'package:parkflow_manager/core/error/failures.dart';
 import 'package:parkflow_manager/core/network/network_info.dart';
@@ -8,6 +9,7 @@ import 'package:parkflow_manager/features/employee_management/domain/entities/em
 import 'package:parkflow_manager/features/employee_management/domain/repositories/employee_repository.dart';
 import 'package:parkflow_manager/features/parking_session/data/datasources/session_local_datasource.dart';
 
+@Injectable(as: EmployeeRepository)
 class EmployeeRepositoryImpl implements EmployeeRepository {
   final EmployeeLocalDataSource localDataSource;
   final EmployeeRemoteDataSource remoteDataSource;

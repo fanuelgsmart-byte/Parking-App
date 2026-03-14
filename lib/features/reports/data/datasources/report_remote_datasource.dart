@@ -1,3 +1,4 @@
+import 'package:injectable/injectable.dart';
 import 'package:parkflow_manager/core/constants/api_constants.dart';
 import 'package:parkflow_manager/core/error/exceptions.dart';
 import 'package:parkflow_manager/core/network/api_client.dart';
@@ -22,6 +23,7 @@ abstract class ReportRemoteDataSource {
   );
 }
 
+@Injectable(as: ReportRemoteDataSource)
 class ReportRemoteDataSourceImpl implements ReportRemoteDataSource {
   final ApiClient apiClient;
 

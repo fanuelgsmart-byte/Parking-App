@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart';
+import 'package:injectable/injectable.dart';
 import 'package:parkflow_manager/core/database/app_database.dart';
 
 abstract class SessionLocalDataSource {
@@ -18,6 +19,7 @@ abstract class SessionLocalDataSource {
   );
 }
 
+@Injectable(as: SessionLocalDataSource)
 class SessionLocalDataSourceImpl implements SessionLocalDataSource {
   final AppDatabase database;
 
@@ -75,16 +77,33 @@ class SessionLocalDataSourceImpl implements SessionLocalDataSource {
   Future<List<ParkingSessionData>> searchSessions({
     String? licensePlate,
     String? spotNumber,
-  }) {
-    return (database.select(database.parkingSessions)
-          ..where((tbl) {
-            Expression<bool> condition = const Constant(true);
-            if (spotNumber != null) {
-              // Will need a join with ParkingSpots for spotNumber search
-            }
-            return condition;
-          }))
-        .get();
+  }) async {
+    // Build a custom select with joins for cross-table filtering
+    final query = database.select(database.parkingSessions).join([
+      innerJoin(
+        database.vehicles,
+        database.vehicles.id
+            .equalsExp(database.parkingSessions.vehicleId),
+      ),
+      innerJoin(
+        database.parkingSpots,
+        database.parkingSpots.id
+            .equalsExp(database.parkingSessions.spotId),
+      ),
+    ]);
+
+    if (licensePlate != null && licensePlate.isNotEmpty) {
+      query.where(database.vehicles.licensePlate.like('%$licensePlate%'));
+    }
+
+    if (spotNumber != null && spotNumber.isNotEmpty) {
+      query.where(database.parkingSpots.spotNumber.like('%$spotNumber%'));
+    }
+
+    final rows = await query.get();
+    return rows
+        .map((row) => row.readTable(database.parkingSessions))
+        .toList();
   }
 
   @override

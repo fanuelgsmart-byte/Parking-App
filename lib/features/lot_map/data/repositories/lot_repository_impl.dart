@@ -1,3 +1,4 @@
+import 'package:injectable/injectable.dart';
 import 'package:parkflow_manager/core/database/app_database.dart';
 import 'package:parkflow_manager/core/error/exceptions.dart';
 import 'package:parkflow_manager/core/error/failures.dart';
@@ -10,6 +11,7 @@ import 'package:parkflow_manager/features/lot_map/domain/entities/parking_lot.da
 import 'package:parkflow_manager/features/lot_map/domain/entities/parking_spot.dart';
 import 'package:parkflow_manager/features/lot_map/domain/repositories/lot_repository.dart';
 
+@Injectable(as: LotRepository)
 class LotRepositoryImpl implements LotRepository {
   final LotLocalDataSource localDataSource;
   final LotRemoteDataSource remoteDataSource;

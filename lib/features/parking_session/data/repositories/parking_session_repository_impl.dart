@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:drift/drift.dart';
+import 'package:injectable/injectable.dart';
 import 'package:parkflow_manager/core/database/app_database.dart';
 import 'package:parkflow_manager/core/error/exceptions.dart';
 import 'package:parkflow_manager/core/error/failures.dart';
@@ -13,6 +14,7 @@ import 'package:parkflow_manager/features/parking_session/data/models/vehicle_mo
 import 'package:parkflow_manager/features/parking_session/domain/entities/parking_session.dart';
 import 'package:parkflow_manager/features/parking_session/domain/repositories/parking_session_repository.dart';
 
+@Injectable(as: ParkingSessionRepository)
 class ParkingSessionRepositoryImpl implements ParkingSessionRepository {
   final SessionLocalDataSource localDataSource;
   final SessionRemoteDataSource remoteDataSource;

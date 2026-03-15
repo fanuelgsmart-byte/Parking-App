@@ -1,9 +1,11 @@
+import 'package:injectable/injectable.dart';
 import 'package:parkflow_manager/core/error/failures.dart';
 import 'package:parkflow_manager/core/utils/either.dart';
 import 'package:parkflow_manager/core/utils/usecase.dart';
 import 'package:parkflow_manager/features/auth/domain/entities/user.dart';
 import 'package:parkflow_manager/features/auth/domain/repositories/auth_repository.dart';
 
+@injectable
 class LoginUseCase extends UseCase<User, LoginParams> {
   final AuthRepository repository;
 

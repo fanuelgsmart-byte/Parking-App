@@ -5,12 +5,16 @@ import 'package:parkflow_manager/core/database/app_database.dart';
 import 'package:parkflow_manager/core/database/database_provider.dart';
 import 'package:parkflow_manager/core/network/api_client.dart';
 import 'package:parkflow_manager/core/network/network_info.dart';
+import 'package:parkflow_manager/core/network/sync_service.dart';
+import 'package:parkflow_manager/core/services/incident_service.dart';
 
 @module
 abstract class RegisterModule {
   @singleton
   FlutterSecureStorage get secureStorage => const FlutterSecureStorage(
         aOptions: AndroidOptions(encryptedSharedPreferences: true),
+        iOptions:
+            IOSOptions(accessibility: KeychainAccessibility.first_unlock),
       );
 
   @singleton
@@ -25,5 +29,22 @@ abstract class RegisterModule {
       ApiClient(secureStorage: secureStorage);
 
   @singleton
-  AppDatabase get database => DatabaseProvider.database;
+  @preResolve
+  Future<AppDatabase> database() => DatabaseProvider.getDatabase();
+
+  @singleton
+  SyncService syncService(
+    AppDatabase database,
+    ApiClient apiClient,
+    NetworkInfo networkInfo,
+  ) =>
+      SyncService(
+        database: database,
+        apiClient: apiClient,
+        networkInfo: networkInfo,
+      );
+
+  @singleton
+  IncidentService incidentService(AppDatabase database) =>
+      IncidentService(database: database);
 }

@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart';
+import 'package:injectable/injectable.dart';
 import 'package:parkflow_manager/core/database/app_database.dart';
 
 abstract class PaymentLocalDataSource {
@@ -12,6 +13,7 @@ abstract class PaymentLocalDataSource {
   );
 }
 
+@Injectable(as: PaymentLocalDataSource)
 class PaymentLocalDataSourceImpl implements PaymentLocalDataSource {
   final AppDatabase database;
 

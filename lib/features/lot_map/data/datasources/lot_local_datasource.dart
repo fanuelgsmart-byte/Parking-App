@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart';
+import 'package:injectable/injectable.dart';
 import 'package:parkflow_manager/core/database/app_database.dart';
 
 abstract class LotLocalDataSource {
@@ -7,6 +8,7 @@ abstract class LotLocalDataSource {
   Future<bool> updateSpotStatus(int spotId, String status);
 }
 
+@Injectable(as: LotLocalDataSource)
 class LotLocalDataSourceImpl implements LotLocalDataSource {
   final AppDatabase database;
 

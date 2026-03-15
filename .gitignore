@@ -41,6 +41,7 @@ app.*.map.json
 *.g.dart
 *.freezed.dart
 *.config.dart
+!lib/core/di/injection.config.dart
 *.mocks.dart
 
 # Android related

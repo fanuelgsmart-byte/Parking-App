@@ -7,9 +7,9 @@ import 'package:parkflow_manager/features/lot_map/domain/repositories/lot_reposi
 
 @injectable
 class GetLotSpots extends UseCase<List<ParkingSpot>, String> {
-  final LotRepository repository;
 
   GetLotSpots({required this.repository});
+  final LotRepository repository;
 
   @override
   Future<Either<Failure, List<ParkingSpot>>> call(String lotId) {

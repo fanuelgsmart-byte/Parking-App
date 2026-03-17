@@ -7,9 +7,9 @@ import 'package:parkflow_manager/core/utils/validators.dart';
 
 /// Allows managers to configure per-size hourly parking rates.
 class RateConfigPage extends StatefulWidget {
-  final String lotId;
 
   const RateConfigPage({super.key, required this.lotId});
+  final String lotId;
 
   @override
   State<RateConfigPage> createState() => _RateConfigPageState();
@@ -98,7 +98,7 @@ class _RateConfigPageState extends State<RateConfigPage> {
                   ),
                   child: Row(
                     children: [
-                      Icon(Icons.info_outline_rounded,
+                      const Icon(Icons.info_outline_rounded,
                           color: AppTheme.infoColor, size: 18),
                       const SizedBox(width: 8),
                       Expanded(
@@ -239,10 +239,10 @@ class _RateConfigPageState extends State<RateConfigPage> {
 // ──────────────────────────── Rate Card ──────────────────────────────────────
 
 class _RateCard extends StatelessWidget {
-  final ParkingRateData rate;
-  final void Function(ParkingRateData) onEdit;
 
   const _RateCard({required this.rate, required this.onEdit});
+  final ParkingRateData rate;
+  final void Function(ParkingRateData) onEdit;
 
   static const _sizeData = {
     'small': (
@@ -397,15 +397,15 @@ class _RateCard extends StatelessWidget {
 // ──────────────────────────── Add Rate Sheet ─────────────────────────────────
 
 class _AddRateSheet extends StatefulWidget {
-  final String lotId;
-  final AppDatabase database;
-  final VoidCallback onSaved;
 
   const _AddRateSheet({
     required this.lotId,
     required this.database,
     required this.onSaved,
   });
+  final String lotId;
+  final AppDatabase database;
+  final VoidCallback onSaved;
 
   @override
   State<_AddRateSheet> createState() => _AddRateSheetState();
@@ -442,7 +442,7 @@ class _AddRateSheetState extends State<_AddRateSheet> {
               ),
               const SizedBox(height: 20),
               DropdownButtonFormField<String>(
-                value: _selectedSize,
+                initialValue: _selectedSize,
                 decoration: const InputDecoration(
                   labelText: 'Vehicle Size',
                   prefixIcon: Icon(Icons.directions_car_rounded),
@@ -521,10 +521,6 @@ class _AddRateSheetState extends State<_AddRateSheet> {
 // ──────────────────────────── Edit Rate Sheet ────────────────────────────────
 
 class _EditRateSheet extends StatefulWidget {
-  final ParkingRateData rate;
-  final String lotId;
-  final AppDatabase database;
-  final VoidCallback onSaved;
 
   const _EditRateSheet({
     required this.rate,
@@ -532,6 +528,10 @@ class _EditRateSheet extends StatefulWidget {
     required this.database,
     required this.onSaved,
   });
+  final ParkingRateData rate;
+  final String lotId;
+  final AppDatabase database;
+  final VoidCallback onSaved;
 
   @override
   State<_EditRateSheet> createState() => _EditRateSheetState();
@@ -644,9 +644,9 @@ class _EditRateSheetState extends State<_EditRateSheet> {
 // ──────────────────────────── Sheet Container ────────────────────────────────
 
 class _Sheet extends StatelessWidget {
-  final Widget child;
 
   const _Sheet({required this.child});
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {

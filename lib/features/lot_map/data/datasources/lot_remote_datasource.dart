@@ -13,9 +13,9 @@ abstract class LotRemoteDataSource {
 
 @Injectable(as: LotRemoteDataSource)
 class LotRemoteDataSourceImpl implements LotRemoteDataSource {
-  final ApiClient apiClient;
 
   LotRemoteDataSourceImpl({required this.apiClient});
+  final ApiClient apiClient;
 
   @override
   Future<List<ParkingLotModel>> getLots() async {

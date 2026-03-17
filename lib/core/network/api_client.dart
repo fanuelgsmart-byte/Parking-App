@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
 import 'package:flutter/foundation.dart';
@@ -9,12 +10,6 @@ import 'package:parkflow_manager/core/error/exceptions.dart';
 import 'package:parkflow_manager/core/security/request_signer.dart';
 
 class ApiClient {
-  late final Dio _dio;
-  final FlutterSecureStorage _secureStorage;
-  late final RequestSigner _requestSigner;
-
-  /// Tracks consecutive refresh failures to prevent infinite retry loops.
-  bool _isRefreshing = false;
 
   ApiClient({required FlutterSecureStorage secureStorage})
       : _secureStorage = secureStorage,
@@ -49,6 +44,12 @@ class ApiClient {
         ),
     ]);
   }
+  late final Dio _dio;
+  final FlutterSecureStorage _secureStorage;
+  late final RequestSigner _requestSigner;
+
+  /// Tracks consecutive refresh failures to prevent infinite retry loops.
+  bool _isRefreshing = false;
 
   Dio get dio => _dio;
 
@@ -68,7 +69,7 @@ class ApiClient {
           // To extract your server cert fingerprint:
           //   openssl s_client -connect api.parkflow.example.com:443 \
           //     | openssl x509 -fingerprint -sha256 -noout
-          final validHosts = ApiConstants.pinnedHosts;
+          const validHosts = ApiConstants.pinnedHosts;
           if (!validHosts.contains(host)) {
             // Reject connections to unexpected hosts
             return false;
@@ -76,7 +77,7 @@ class ApiClient {
           // In debug mode, allow self-signed certs for local development
           if (kDebugMode) return true;
           // In release mode, validate against pinned fingerprints
-          final fingerprint = cert.sha256;
+          final fingerprint = sha256.convert(cert.der).bytes;
           return ApiConstants.pinnedCertFingerprints
               .any((pinned) => _compareFingerprints(fingerprint, pinned));
         };
@@ -280,7 +281,7 @@ class ApiClient {
         e.type == DioExceptionType.receiveTimeout ||
         e.type == DioExceptionType.sendTimeout ||
         e.type == DioExceptionType.connectionError) {
-      throw NetworkException(
+      throw const NetworkException(
         message: 'Network unavailable. Please check your connection.',
       );
     }

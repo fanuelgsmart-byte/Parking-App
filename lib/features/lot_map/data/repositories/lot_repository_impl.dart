@@ -13,15 +13,15 @@ import 'package:parkflow_manager/features/lot_map/domain/repositories/lot_reposi
 
 @Injectable(as: LotRepository)
 class LotRepositoryImpl implements LotRepository {
-  final LotLocalDataSource localDataSource;
-  final LotRemoteDataSource remoteDataSource;
-  final NetworkInfo networkInfo;
 
   LotRepositoryImpl({
     required this.localDataSource,
     required this.remoteDataSource,
     required this.networkInfo,
   });
+  final LotLocalDataSource localDataSource;
+  final LotRemoteDataSource remoteDataSource;
+  final NetworkInfo networkInfo;
 
   @override
   Future<Either<Failure, List<ParkingLot>>> getLots() async {
@@ -53,7 +53,7 @@ class LotRepositoryImpl implements LotRepository {
     try {
       final localSpots = await localDataSource.getSpots(lotId);
       return Right(
-        localSpots.map((s) => _mapSpotDataToEntity(s)).toList(),
+        localSpots.map(_mapSpotDataToEntity).toList(),
       );
     } catch (e) {
       return Left(CacheFailure(message: 'Failed to get spots: $e'));
@@ -63,7 +63,7 @@ class LotRepositoryImpl implements LotRepository {
   @override
   Stream<List<ParkingSpot>> watchSpots(String lotId) {
     return localDataSource.watchSpots(lotId).map(
-          (spots) => spots.map((s) => _mapSpotDataToEntity(s)).toList(),
+          (spots) => spots.map(_mapSpotDataToEntity).toList(),
         );
   }
 

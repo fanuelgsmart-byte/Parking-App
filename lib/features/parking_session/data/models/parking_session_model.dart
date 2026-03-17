@@ -1,19 +1,7 @@
 import 'package:parkflow_manager/features/parking_session/data/models/vehicle_model.dart';
 import 'package:parkflow_manager/features/parking_session/domain/entities/parking_session.dart';
-import 'package:parkflow_manager/features/parking_session/domain/entities/vehicle.dart';
 
 class ParkingSessionModel {
-  final int id;
-  final VehicleModel vehicle;
-  final int spotId;
-  final String spotNumber;
-  final String lotId;
-  final DateTime entryTime;
-  final DateTime? exitTime;
-  final double? totalFee;
-  final String status;
-  final String employeeId;
-  final bool isSynced;
 
   const ParkingSessionModel({
     required this.id,
@@ -48,6 +36,17 @@ class ParkingSessionModel {
       isSynced: json['is_synced'] as bool? ?? true,
     );
   }
+  final int id;
+  final VehicleModel vehicle;
+  final int spotId;
+  final String spotNumber;
+  final String lotId;
+  final DateTime entryTime;
+  final DateTime? exitTime;
+  final double? totalFee;
+  final String status;
+  final String employeeId;
+  final bool isSynced;
 
   Map<String, dynamic> toJson() {
     return {

@@ -15,10 +15,6 @@ import 'package:parkflow_manager/features/payment/domain/repositories/payment_re
 
 @Injectable(as: PaymentRepository)
 class PaymentRepositoryImpl implements PaymentRepository {
-  final PaymentLocalDataSource localDataSource;
-  final PaymentRemoteDataSource remoteDataSource;
-  final NetworkInfo networkInfo;
-  final AppDatabase database;
 
   PaymentRepositoryImpl({
     required this.localDataSource,
@@ -26,6 +22,10 @@ class PaymentRepositoryImpl implements PaymentRepository {
     required this.networkInfo,
     required this.database,
   });
+  final PaymentLocalDataSource localDataSource;
+  final PaymentRemoteDataSource remoteDataSource;
+  final NetworkInfo networkInfo;
+  final AppDatabase database;
 
   @override
   Future<Either<Failure, Payment>> processPayment({
@@ -61,7 +61,7 @@ class PaymentRepositoryImpl implements PaymentRepository {
       // Queue for sync
       await database.into(database.syncQueue).insert(
             SyncQueueCompanion(
-              tableName: const Value('payments'),
+              entityName: const Value('payments'),
               recordId: Value(paymentId),
               operation: const Value('create'),
               payload: Value(jsonEncode({
@@ -172,7 +172,7 @@ class PaymentRepositoryImpl implements PaymentRepository {
       final payments =
           await localDataSource.getPaymentsByDateRange(start, end);
       return Right(
-        payments.map((p) => _mapPaymentDataToEntity(p)).toList(),
+        payments.map(_mapPaymentDataToEntity).toList(),
       );
     } catch (e) {
       return Left(CacheFailure(message: 'Failed to get payments: $e'));

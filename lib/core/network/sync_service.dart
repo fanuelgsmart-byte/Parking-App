@@ -8,13 +8,6 @@ import 'package:parkflow_manager/core/network/api_client.dart';
 import 'package:parkflow_manager/core/network/network_info.dart';
 
 class SyncService {
-  final AppDatabase _database;
-  final ApiClient _apiClient;
-  final NetworkInfo _networkInfo;
-  final Logger _logger = Logger(
-    // Suppress PII in release builds
-    filter: kDebugMode ? DevelopmentFilter() : ProductionFilter(),
-  );
 
   SyncService({
     required AppDatabase database,
@@ -23,6 +16,13 @@ class SyncService {
   })  : _database = database,
         _apiClient = apiClient,
         _networkInfo = networkInfo;
+  final AppDatabase _database;
+  final ApiClient _apiClient;
+  final NetworkInfo _networkInfo;
+  final Logger _logger = Logger(
+    // Suppress PII in release builds
+    filter: kDebugMode ? DevelopmentFilter() : ProductionFilter(),
+  );
 
   /// Syncs all pending local changes to the remote API.
   Future<void> syncAll() async {
@@ -63,7 +63,7 @@ class SyncService {
   }
 
   Future<void> _pushRecord(SyncQueueData item) async {
-    final path = '/${item.tableName}';
+    final path = '/${item.entityName}';
 
     // Parse the stored JSON payload into a Map for proper serialization
     final dynamic parsedPayload = _safeParsePayload(item.payload);

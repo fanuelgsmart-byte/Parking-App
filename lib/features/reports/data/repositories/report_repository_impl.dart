@@ -9,13 +9,13 @@ import 'package:parkflow_manager/features/reports/domain/repositories/report_rep
 
 @Injectable(as: ReportRepository)
 class ReportRepositoryImpl implements ReportRepository {
-  final ReportLocalDataSource localDataSource;
-  final AppDatabase database;
 
   ReportRepositoryImpl({
     required this.localDataSource,
     required this.database,
   });
+  final ReportLocalDataSource localDataSource;
+  final AppDatabase database;
 
   @override
   Future<Either<Failure, RevenueReport>> getRevenueReport({
@@ -203,9 +203,9 @@ class ReportRepositoryImpl implements ReportRepository {
 }
 
 class _DailyAccum {
+
+  _DailyAccum({required this.date});
   final DateTime date;
   double revenue = 0;
   int count = 0;
-
-  _DailyAccum({required this.date});
 }

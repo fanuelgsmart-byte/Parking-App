@@ -6,11 +6,11 @@ import 'dart:math';
 /// is delayed by an exponentially increasing duration (capped at 60s).
 /// Resets on successful login.
 class LoginThrottle {
+
+  LoginThrottle({this.maxAttempts = 3});
   final int maxAttempts;
   int _failedAttempts = 0;
   DateTime? _lockUntil;
-
-  LoginThrottle({this.maxAttempts = 3});
 
   /// Whether the user is currently locked out.
   bool get isLocked {

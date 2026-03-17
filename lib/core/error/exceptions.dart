@@ -1,26 +1,26 @@
 class ServerException implements Exception {
-  final String message;
-  final int? statusCode;
 
   const ServerException({required this.message, this.statusCode});
+  final String message;
+  final int? statusCode;
 }
 
 class CacheException implements Exception {
-  final String message;
 
   const CacheException({required this.message});
+  final String message;
 }
 
 class NetworkException implements Exception {
-  final String message;
 
   const NetworkException({
     this.message = 'No internet connection available.',
   });
+  final String message;
 }
 
 class AuthException implements Exception {
-  final String message;
 
   const AuthException({required this.message});
+  final String message;
 }

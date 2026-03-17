@@ -12,9 +12,9 @@ abstract class AuthRemoteDataSource {
 
 @Injectable(as: AuthRemoteDataSource)
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
-  final ApiClient apiClient;
 
   AuthRemoteDataSourceImpl({required this.apiClient});
+  final ApiClient apiClient;
 
   @override
   Future<UserModel> login(String email, String password) async {

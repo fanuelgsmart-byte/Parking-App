@@ -3,13 +3,6 @@ import 'package:parkflow_manager/core/theme/app_theme.dart';
 
 /// A metric display card with an icon, value, label and optional gradient.
 class StatCard extends StatelessWidget {
-  final String value;
-  final String label;
-  final IconData icon;
-  final Color? color;
-  final Gradient? gradient;
-  final Widget? trailing;
-  final VoidCallback? onTap;
 
   const StatCard({
     super.key,
@@ -21,6 +14,13 @@ class StatCard extends StatelessWidget {
     this.trailing,
     this.onTap,
   });
+  final String value;
+  final String label;
+  final IconData icon;
+  final Color? color;
+  final Gradient? gradient;
+  final Widget? trailing;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {

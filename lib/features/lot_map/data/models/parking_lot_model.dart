@@ -1,13 +1,6 @@
 import 'package:parkflow_manager/features/lot_map/domain/entities/parking_lot.dart';
 
 class ParkingLotModel {
-  final String id;
-  final String name;
-  final String address;
-  final int totalSpots;
-  final int availableSpots;
-  final int rows;
-  final int columns;
 
   const ParkingLotModel({
     required this.id,
@@ -30,6 +23,13 @@ class ParkingLotModel {
       columns: json['columns'] as int,
     );
   }
+  final String id;
+  final String name;
+  final String address;
+  final int totalSpots;
+  final int availableSpots;
+  final int rows;
+  final int columns;
 
   Map<String, dynamic> toJson() {
     return {

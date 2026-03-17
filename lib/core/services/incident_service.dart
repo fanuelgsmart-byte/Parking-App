@@ -34,14 +34,6 @@ extension IncidentTypeExtension on IncidentType {
 }
 
 class IncidentRecord {
-  final int id;
-  final String lotId;
-  final String employeeId;
-  final IncidentType type;
-  final String description;
-  final String? licensePlate;
-  final DateTime occurredAt;
-  final bool isSynced;
 
   const IncidentRecord({
     required this.id,
@@ -53,13 +45,21 @@ class IncidentRecord {
     required this.occurredAt,
     required this.isSynced,
   });
+  final int id;
+  final String lotId;
+  final String employeeId;
+  final IncidentType type;
+  final String description;
+  final String? licensePlate;
+  final DateTime occurredAt;
+  final bool isSynced;
 }
 
 /// Service for logging and retrieving parking incidents.
 class IncidentService {
-  final AppDatabase database;
 
   IncidentService({required this.database});
+  final AppDatabase database;
 
   /// Log a new incident. Returns the created [IncidentRecord].
   Future<IncidentRecord> logIncident({
@@ -85,7 +85,7 @@ class IncidentService {
     // Queue sync
     await database.into(database.syncQueue).insert(
           SyncQueueCompanion(
-            tableName: const Value('incidents'),
+            entityName: const Value('incidents'),
             recordId: Value(id),
             operation: const Value('create'),
             payload: Value(jsonEncode({

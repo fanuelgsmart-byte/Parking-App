@@ -8,9 +8,9 @@ import 'package:parkflow_manager/features/payment/domain/entities/payment.dart';
 import 'package:parkflow_manager/features/payment/presentation/bloc/checkout_bloc.dart';
 
 class CheckoutPage extends StatefulWidget {
-  final int sessionId;
 
   const CheckoutPage({super.key, required this.sessionId});
+  final int sessionId;
 
   @override
   State<CheckoutPage> createState() => _CheckoutPageState();
@@ -111,15 +111,15 @@ class _CheckoutPageState extends State<CheckoutPage> {
 // ──────────────────────────── Ready View ─────────────────────────────────────
 
 class _CheckoutReadyView extends StatelessWidget {
-  final ParkingSession session;
-  final double fee;
-  final double ratePerHour;
 
   const _CheckoutReadyView({
     required this.session,
     required this.fee,
     required this.ratePerHour,
   });
+  final ParkingSession session;
+  final double fee;
+  final double ratePerHour;
 
   @override
   Widget build(BuildContext context) {
@@ -177,9 +177,9 @@ class _CheckoutReadyView extends StatelessWidget {
 }
 
 class _VehicleCard extends StatelessWidget {
-  final ParkingSession session;
 
   const _VehicleCard({required this.session});
+  final ParkingSession session;
 
   @override
   Widget build(BuildContext context) {
@@ -253,15 +253,15 @@ class _VehicleCard extends StatelessWidget {
 }
 
 class _FeeBreakdownCard extends StatelessWidget {
-  final ParkingSession session;
-  final double fee;
-  final double ratePerHour;
 
   const _FeeBreakdownCard({
     required this.session,
     required this.fee,
     required this.ratePerHour,
   });
+  final ParkingSession session;
+  final double fee;
+  final double ratePerHour;
 
   @override
   Widget build(BuildContext context) {
@@ -331,15 +331,15 @@ class _FeeBreakdownCard extends StatelessWidget {
 }
 
 class _FeeRow extends StatelessWidget {
-  final String label;
-  final String value;
-  final bool dark;
 
   const _FeeRow({
     required this.label,
     required this.value,
     this.dark = false,
   });
+  final String label;
+  final String value;
+  final bool dark;
 
   @override
   Widget build(BuildContext context) {
@@ -370,11 +370,6 @@ class _FeeRow extends StatelessWidget {
 }
 
 class _PaymentOptionCard extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final Color color;
-  final VoidCallback onTap;
 
   const _PaymentOptionCard({
     required this.icon,
@@ -383,6 +378,11 @@ class _PaymentOptionCard extends StatelessWidget {
     required this.color,
     required this.onTap,
   });
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final Color color;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -440,15 +440,15 @@ class _PaymentOptionCard extends StatelessWidget {
 // ──────────────────────────── QR View ────────────────────────────────────────
 
 class _QrPaymentView extends StatelessWidget {
-  final ParkingSession session;
-  final double fee;
-  final String qrCodeUrl;
 
   const _QrPaymentView({
     required this.session,
     required this.fee,
     required this.qrCodeUrl,
   });
+  final ParkingSession session;
+  final double fee;
+  final String qrCodeUrl;
 
   @override
   Widget build(BuildContext context) {
@@ -549,10 +549,10 @@ class _QrPaymentView extends StatelessWidget {
 // ──────────────────────────── Success Sheet ───────────────────────────────────
 
 class _SuccessSheet extends StatelessWidget {
-  final Payment payment;
-  final VoidCallback onDone;
 
   const _SuccessSheet({required this.payment, required this.onDone});
+  final Payment payment;
+  final VoidCallback onDone;
 
   @override
   Widget build(BuildContext context) {
@@ -631,10 +631,10 @@ class _SuccessSheet extends StatelessWidget {
 // ──────────────────────────── Error View ─────────────────────────────────────
 
 class _ErrorView extends StatelessWidget {
-  final String message;
-  final VoidCallback onRetry;
 
   const _ErrorView({required this.message, required this.onRetry});
+  final String message;
+  final VoidCallback onRetry;
 
   @override
   Widget build(BuildContext context) {

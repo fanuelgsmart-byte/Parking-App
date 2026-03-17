@@ -7,9 +7,9 @@ import 'package:parkflow_manager/features/parking_session/domain/repositories/pa
 
 @injectable
 class GetActiveSessions extends UseCase<List<ParkingSession>, String> {
-  final ParkingSessionRepository repository;
 
   GetActiveSessions({required this.repository});
+  final ParkingSessionRepository repository;
 
   @override
   Future<Either<Failure, List<ParkingSession>>> call(String lotId) {

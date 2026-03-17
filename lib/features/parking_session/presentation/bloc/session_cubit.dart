@@ -25,27 +25,27 @@ class SessionLoading extends SessionState {
 }
 
 class SessionLoaded extends SessionState {
-  final List<ParkingSession> sessions;
 
   const SessionLoaded({required this.sessions});
+  final List<ParkingSession> sessions;
 
   @override
   List<Object?> get props => [sessions];
 }
 
 class SessionCreated extends SessionState {
-  final ParkingSession session;
 
   const SessionCreated({required this.session});
+  final ParkingSession session;
 
   @override
   List<Object?> get props => [session];
 }
 
 class SessionError extends SessionState {
-  final String message;
 
   const SessionError({required this.message});
+  final String message;
 
   @override
   List<Object?> get props => [message];
@@ -55,16 +55,16 @@ class SessionError extends SessionState {
 
 @injectable
 class SessionCubit extends Cubit<SessionState> {
-  final GetActiveSessions getActiveSessions;
-  final ParkingSessionRepository repository;
-
-  StreamSubscription<List<ParkingSession>>? _watchSub;
-  String? _currentLotId;
 
   SessionCubit({
     required this.getActiveSessions,
     required this.repository,
   }) : super(const SessionInitial());
+  final GetActiveSessions getActiveSessions;
+  final ParkingSessionRepository repository;
+
+  StreamSubscription<List<ParkingSession>>? _watchSub;
+  String? _currentLotId;
 
   Future<void> loadActiveSessions(String lotId) async {
     _currentLotId = lotId;

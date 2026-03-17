@@ -1,11 +1,6 @@
 import 'package:parkflow_manager/features/parking_session/domain/entities/vehicle.dart';
 
 class VehicleModel {
-  final int id;
-  final String licensePlate;
-  final String size;
-  final String color;
-  final DateTime createdAt;
 
   const VehicleModel({
     required this.id,
@@ -24,6 +19,11 @@ class VehicleModel {
       createdAt: DateTime.parse(json['created_at'] as String),
     );
   }
+  final int id;
+  final String licensePlate;
+  final String size;
+  final String color;
+  final DateTime createdAt;
 
   Map<String, dynamic> toJson() {
     return {

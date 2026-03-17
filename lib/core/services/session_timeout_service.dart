@@ -7,15 +7,15 @@ import 'package:flutter/widgets.dart';
 /// Usage: Wrap the app in [SessionTimeoutListener] widget which calls
 /// [onTimeout] (typically triggers AuthLogoutRequested).
 class SessionTimeoutService {
-  final Duration timeout;
-  final VoidCallback onTimeout;
-
-  Timer? _timer;
 
   SessionTimeoutService({
     this.timeout = const Duration(minutes: 15),
     required this.onTimeout,
   });
+  final Duration timeout;
+  final VoidCallback onTimeout;
+
+  Timer? _timer;
 
   /// Call on every user interaction to reset the timer.
   void resetTimer() {
@@ -42,14 +42,14 @@ class SessionTimeoutService {
 /// Widget that wraps the app to detect user interaction and reset the
 /// inactivity timer. Place this directly below MultiBlocProvider.
 class SessionTimeoutListener extends StatefulWidget {
-  final Widget child;
-  final SessionTimeoutService timeoutService;
 
   const SessionTimeoutListener({
     super.key,
     required this.child,
     required this.timeoutService,
   });
+  final Widget child;
+  final SessionTimeoutService timeoutService;
 
   @override
   State<SessionTimeoutListener> createState() =>

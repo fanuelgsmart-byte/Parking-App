@@ -21,9 +21,9 @@ abstract class SessionLocalDataSource {
 
 @Injectable(as: SessionLocalDataSource)
 class SessionLocalDataSourceImpl implements SessionLocalDataSource {
-  final AppDatabase database;
 
   SessionLocalDataSourceImpl({required this.database});
+  final AppDatabase database;
 
   @override
   Future<List<ParkingSessionData>> getActiveSessions(String lotId) {

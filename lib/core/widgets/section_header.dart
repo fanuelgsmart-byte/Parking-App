@@ -2,10 +2,6 @@ import 'package:flutter/material.dart';
 
 /// A section title with optional subtitle and action button.
 class SectionHeader extends StatelessWidget {
-  final String title;
-  final String? subtitle;
-  final String? actionLabel;
-  final VoidCallback? onAction;
 
   const SectionHeader({
     super.key,
@@ -14,6 +10,10 @@ class SectionHeader extends StatelessWidget {
     this.actionLabel,
     this.onAction,
   });
+  final String title;
+  final String? subtitle;
+  final String? actionLabel;
+  final VoidCallback? onAction;
 
   @override
   Widget build(BuildContext context) {

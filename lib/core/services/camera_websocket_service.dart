@@ -8,9 +8,6 @@ import 'package:parkflow_manager/core/constants/api_constants.dart';
 
 /// Payload emitted when the camera service detects a license plate.
 class PlateDetectionEvent {
-  final String licensePlate;
-  final String confidence;
-  final DateTime timestamp;
 
   const PlateDetectionEvent({
     required this.licensePlate,
@@ -27,6 +24,9 @@ class PlateDetectionEvent {
           : DateTime.now(),
     );
   }
+  final String licensePlate;
+  final String confidence;
+  final DateTime timestamp;
 }
 
 /// Manages the WebSocket connection to the ALPR camera system.

@@ -49,7 +49,7 @@ class _ManagerDashboardPageState extends State<ManagerDashboardPage> {
       return;
     }
 
-    if (filePath != null && context.mounted) {
+    if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('PDF exported: ${filePath.split('/').last}'),
@@ -154,10 +154,6 @@ class _ManagerDashboardPageState extends State<ManagerDashboardPage> {
 // ──────────────────────────── Tab Button ─────────────────────────────────────
 
 class _TabButton extends StatelessWidget {
-  final String label;
-  final IconData icon;
-  final bool selected;
-  final VoidCallback onTap;
 
   const _TabButton({
     required this.label,
@@ -165,6 +161,10 @@ class _TabButton extends StatelessWidget {
     required this.selected,
     required this.onTap,
   });
+  final String label;
+  final IconData icon;
+  final bool selected;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -247,9 +247,9 @@ class _RevenueTab extends StatelessWidget {
 }
 
 class _RevenueContent extends StatelessWidget {
-  final RevenueReport report;
 
   const _RevenueContent({required this.report});
+  final RevenueReport report;
 
   @override
   Widget build(BuildContext context) {
@@ -305,7 +305,7 @@ class _RevenueContent extends StatelessWidget {
           const SizedBox(height: 24),
 
           // ── Trend Chart ──────────────────────────────────────
-          _SectionTitle('Daily Revenue Trend'),
+          const _SectionTitle('Daily Revenue Trend'),
           const SizedBox(height: 12),
           _ChartCard(
             child: report.dailyBreakdown.isNotEmpty
@@ -379,7 +379,7 @@ class _RevenueContent extends StatelessWidget {
           const SizedBox(height: 24),
 
           // ── Pie Chart ────────────────────────────────────────
-          _SectionTitle('Revenue by Vehicle Size'),
+          const _SectionTitle('Revenue by Vehicle Size'),
           const SizedBox(height: 12),
           _ChartCard(
             height: 180,
@@ -433,14 +433,14 @@ class _RevenueContent extends StatelessWidget {
 }
 
 class _PieLegend extends StatelessWidget {
+
+  const _PieLegend({required this.data});
   final Map<String, double> data;
   static const _colors = [
     AppTheme.primary,
     AppTheme.successColor,
     AppTheme.warningColor,
   ];
-
-  const _PieLegend({required this.data});
 
   @override
   Widget build(BuildContext context) {
@@ -509,9 +509,9 @@ class _OccupancyTab extends StatelessWidget {
 }
 
 class _OccupancyContent extends StatelessWidget {
-  final OccupancyReport report;
 
   const _OccupancyContent({required this.report});
+  final OccupancyReport report;
 
   @override
   Widget build(BuildContext context) {
@@ -552,7 +552,7 @@ class _OccupancyContent extends StatelessWidget {
             color: AppTheme.secondary,
           ),
           const SizedBox(height: 24),
-          _SectionTitle('Hourly Traffic Distribution'),
+          const _SectionTitle('Hourly Traffic Distribution'),
           const SizedBox(height: 12),
           _ChartCard(
             height: 220,
@@ -663,9 +663,9 @@ class _EmployeeTab extends StatelessWidget {
 }
 
 class _EmployeeContent extends StatelessWidget {
-  final List<Map<String, dynamic>> data;
 
   const _EmployeeContent({required this.data});
+  final List<Map<String, dynamic>> data;
 
   @override
   Widget build(BuildContext context) {
@@ -760,8 +760,8 @@ class _EmployeeContent extends StatelessWidget {
 // ──────────────────────────── Shared ─────────────────────────────────────────
 
 class _SectionTitle extends StatelessWidget {
-  final String text;
   const _SectionTitle(this.text);
+  final String text;
 
   @override
   Widget build(BuildContext context) {
@@ -775,10 +775,10 @@ class _SectionTitle extends StatelessWidget {
 }
 
 class _ChartCard extends StatelessWidget {
-  final Widget child;
-  final double height;
 
   const _ChartCard({required this.child, this.height = 200});
+  final Widget child;
+  final double height;
 
   @override
   Widget build(BuildContext context) {
@@ -812,10 +812,6 @@ class _ChartEmpty extends StatelessWidget {
 }
 
 class _EmptyReportPrompt extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final VoidCallback onGenerate;
 
   const _EmptyReportPrompt({
     required this.icon,
@@ -823,6 +819,10 @@ class _EmptyReportPrompt extends StatelessWidget {
     required this.subtitle,
     required this.onGenerate,
   });
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final VoidCallback onGenerate;
 
   @override
   Widget build(BuildContext context) {

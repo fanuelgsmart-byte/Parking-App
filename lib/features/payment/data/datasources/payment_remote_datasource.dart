@@ -12,9 +12,9 @@ abstract class PaymentRemoteDataSource {
 
 @Injectable(as: PaymentRemoteDataSource)
 class PaymentRemoteDataSourceImpl implements PaymentRemoteDataSource {
-  final ApiClient apiClient;
 
   PaymentRemoteDataSourceImpl({required this.apiClient});
+  final ApiClient apiClient;
 
   @override
   Future<String> fetchQrCode(int sessionId, double amount) async {

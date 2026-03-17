@@ -23,36 +23,36 @@ class ReportsLoading extends ReportsState {
 }
 
 class RevenueReportLoaded extends ReportsState {
-  final RevenueReport report;
 
   const RevenueReportLoaded({required this.report});
+  final RevenueReport report;
 
   @override
   List<Object?> get props => [report];
 }
 
 class OccupancyReportLoaded extends ReportsState {
-  final OccupancyReport report;
 
   const OccupancyReportLoaded({required this.report});
+  final OccupancyReport report;
 
   @override
   List<Object?> get props => [report];
 }
 
 class EmployeePerformanceLoaded extends ReportsState {
-  final List<Map<String, dynamic>> data;
 
   const EmployeePerformanceLoaded({required this.data});
+  final List<Map<String, dynamic>> data;
 
   @override
   List<Object?> get props => [data];
 }
 
 class ReportsError extends ReportsState {
-  final String message;
 
   const ReportsError({required this.message});
+  final String message;
 
   @override
   List<Object?> get props => [message];
@@ -62,10 +62,10 @@ class ReportsError extends ReportsState {
 
 @injectable
 class ReportsCubit extends Cubit<ReportsState> {
-  final ReportRepository reportRepository;
 
   ReportsCubit({required this.reportRepository})
       : super(const ReportsInitial());
+  final ReportRepository reportRepository;
 
   Future<void> loadRevenueReport({
     required String lotId,

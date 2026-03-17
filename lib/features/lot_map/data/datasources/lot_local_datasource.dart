@@ -10,9 +10,9 @@ abstract class LotLocalDataSource {
 
 @Injectable(as: LotLocalDataSource)
 class LotLocalDataSourceImpl implements LotLocalDataSource {
-  final AppDatabase database;
 
   LotLocalDataSourceImpl({required this.database});
+  final AppDatabase database;
 
   @override
   Future<List<ParkingSpotData>> getSpots(String lotId) {

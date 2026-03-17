@@ -32,9 +32,9 @@ class LotMapPage extends StatelessWidget {
 }
 
 class _LotMapContent extends StatelessWidget {
-  final LotMapLoaded state;
 
   const _LotMapContent({required this.state});
+  final LotMapLoaded state;
 
   @override
   Widget build(BuildContext context) {
@@ -80,15 +80,15 @@ class _LotMapContent extends StatelessWidget {
         ),
 
         // ── Legend ───────────────────────────────────────────────
-        SliverToBoxAdapter(
+        const SliverToBoxAdapter(
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+            padding: EdgeInsets.fromLTRB(16, 0, 16, 12),
             child: Row(
               children: [
                 _LegendChip(color: AppTheme.spotAvailable, label: 'Available'),
-                const SizedBox(width: 8),
+                SizedBox(width: 8),
                 _LegendChip(color: AppTheme.spotOccupied, label: 'Occupied'),
-                const SizedBox(width: 8),
+                SizedBox(width: 8),
                 _LegendChip(color: AppTheme.spotReserved, label: 'Reserved'),
               ],
             ),
@@ -119,10 +119,10 @@ class _LotMapContent extends StatelessWidget {
 // ──────────────────────────── Occupancy Banner ─────────────────────────────
 
 class _OccupancyBanner extends StatelessWidget {
-  final int total;
-  final int available;
 
   const _OccupancyBanner({required this.total, required this.available});
+  final int total;
+  final int available;
 
   @override
   Widget build(BuildContext context) {
@@ -216,15 +216,15 @@ class _OccupancyBanner extends StatelessWidget {
 }
 
 class _StatChip extends StatelessWidget {
-  final String label;
-  final String value;
-  final Color color;
 
   const _StatChip({
     required this.label,
     required this.value,
     required this.color,
   });
+  final String label;
+  final String value;
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
@@ -260,10 +260,10 @@ class _StatChip extends StatelessWidget {
 // ──────────────────────────── Legend ────────────────────────────────────────
 
 class _LegendChip extends StatelessWidget {
-  final Color color;
-  final String label;
 
   const _LegendChip({required this.color, required this.label});
+  final Color color;
+  final String label;
 
   @override
   Widget build(BuildContext context) {
@@ -285,9 +285,9 @@ class _LegendChip extends StatelessWidget {
 // ──────────────────────────── Spot Tile ─────────────────────────────────────
 
 class _SpotTile extends StatelessWidget {
-  final ParkingSpot spot;
 
   const _SpotTile({required this.spot});
+  final ParkingSpot spot;
 
   Color get _color {
     switch (spot.status) {
@@ -355,10 +355,10 @@ class _SpotTile extends StatelessWidget {
 // ──────────────────────────── Spot Detail Sheet ──────────────────────────────
 
 class _SpotDetailSheet extends StatelessWidget {
-  final ParkingSpot spot;
-  final Color color;
 
   const _SpotDetailSheet({required this.spot, required this.color});
+  final ParkingSpot spot;
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
@@ -450,10 +450,10 @@ class _SpotDetailSheet extends StatelessWidget {
 }
 
 class _DetailRow extends StatelessWidget {
-  final String label;
-  final String value;
 
   const _DetailRow({required this.label, required this.value});
+  final String label;
+  final String value;
 
   @override
   Widget build(BuildContext context) {

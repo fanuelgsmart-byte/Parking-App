@@ -4,6 +4,7 @@ part 'app_database.g.dart';
 
 // ──────────────────────────── Tables ────────────────────────────
 
+@DataClassName('VehicleData')
 class Vehicles extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get licensePlate => text().withLength(min: 1, max: 20)();
@@ -12,6 +13,7 @@ class Vehicles extends Table {
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 }
 
+@DataClassName('ParkingSpotData')
 class ParkingSpots extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get spotNumber => text().withLength(min: 1, max: 10)();
@@ -22,6 +24,7 @@ class ParkingSpots extends Table {
   IntColumn get col => integer().nullable()();
 }
 
+@DataClassName('ParkingSessionData')
 class ParkingSessions extends Table {
   IntColumn get id => integer().autoIncrement()();
   IntColumn get vehicleId => integer().references(Vehicles, #id)();
@@ -36,6 +39,7 @@ class ParkingSessions extends Table {
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 }
 
+@DataClassName('PaymentData')
 class Payments extends Table {
   IntColumn get id => integer().autoIncrement()();
   IntColumn get sessionId => integer().references(ParkingSessions, #id)();
@@ -48,6 +52,7 @@ class Payments extends Table {
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 }
 
+@DataClassName('ParkingRateData')
 class ParkingRates extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get lotId => text()();
@@ -58,6 +63,7 @@ class ParkingRates extends Table {
   DateTimeColumn get effectiveTo => dateTime().nullable()();
 }
 
+@DataClassName('EmployeeData')
 class Employees extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get remoteId => text()();
@@ -69,6 +75,7 @@ class Employees extends Table {
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 }
 
+@DataClassName('IncidentData')
 class Incidents extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get lotId => text()();
@@ -81,9 +88,10 @@ class Incidents extends Table {
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 }
 
+@DataClassName('SyncQueueData')
 class SyncQueue extends Table {
   IntColumn get id => integer().autoIncrement()();
-  TextColumn get tableName => text()();
+  TextColumn get entityName => text()();
   IntColumn get recordId => integer()();
   TextColumn get operation => text()(); // create, update, delete
   TextColumn get payload => text()(); // JSON serialized data

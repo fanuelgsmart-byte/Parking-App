@@ -10,10 +10,6 @@ import 'package:parkflow_manager/features/auth/presentation/bloc/auth_state.dart
 
 @injectable
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
-  final LoginUseCase loginUseCase;
-  final LogoutUseCase logoutUseCase;
-  final AuthRepository authRepository;
-  final LoginThrottle _throttle = LoginThrottle(maxAttempts: 3);
 
   AuthBloc({
     required this.loginUseCase,
@@ -24,6 +20,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthLoginRequested>(_onLoginRequested);
     on<AuthLogoutRequested>(_onLogoutRequested);
   }
+  final LoginUseCase loginUseCase;
+  final LogoutUseCase logoutUseCase;
+  final AuthRepository authRepository;
+  final LoginThrottle _throttle = LoginThrottle(maxAttempts: 3);
 
   Future<void> _onCheckRequested(
     AuthCheckRequested event,

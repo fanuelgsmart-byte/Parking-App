@@ -7,9 +7,9 @@ import 'package:parkflow_manager/features/parking_session/domain/repositories/pa
 
 @injectable
 class CreateSession extends UseCase<ParkingSession, CreateSessionParams> {
-  final ParkingSessionRepository repository;
 
   CreateSession({required this.repository});
+  final ParkingSessionRepository repository;
 
   @override
   Future<Either<Failure, ParkingSession>> call(CreateSessionParams params) {
@@ -25,12 +25,6 @@ class CreateSession extends UseCase<ParkingSession, CreateSessionParams> {
 }
 
 class CreateSessionParams {
-  final String licensePlate;
-  final String vehicleSize;
-  final String vehicleColor;
-  final int spotId;
-  final String lotId;
-  final String employeeId;
 
   const CreateSessionParams({
     required this.licensePlate,
@@ -40,4 +34,10 @@ class CreateSessionParams {
     required this.lotId,
     required this.employeeId,
   });
+  final String licensePlate;
+  final String vehicleSize;
+  final String vehicleColor;
+  final int spotId;
+  final String lotId;
+  final String employeeId;
 }

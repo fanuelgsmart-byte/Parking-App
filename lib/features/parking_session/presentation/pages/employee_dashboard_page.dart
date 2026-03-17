@@ -253,7 +253,7 @@ class _EmployeeDashboardPageState extends State<EmployeeDashboardPage> {
                               const SizedBox(height: 16),
                               // Vehicle Size
                               DropdownButtonFormField<String>(
-                                value: selectedSize,
+                                initialValue: selectedSize,
                                 decoration: const InputDecoration(
                                   labelText: 'Vehicle Size *',
                                   prefixIcon:
@@ -297,7 +297,9 @@ class _EmployeeDashboardPageState extends State<EmployeeDashboardPage> {
                                     final authState =
                                         ctx.read<AuthBloc>().state;
                                     if (authState
-                                        is! AuthAuthenticated) return;
+                                        is! AuthAuthenticated) {
+                                      return;
+                                    }
 
                                     ctx.read<SessionCubit>().createSession(
                                           licensePlate: plateCtrl.text
@@ -397,7 +399,7 @@ class _EmployeeDashboardPageState extends State<EmployeeDashboardPage> {
                   child: Column(
                     children: [
                       DropdownButtonFormField<IncidentType>(
-                        value: selectedType,
+                        initialValue: selectedType,
                         decoration: const InputDecoration(
                           labelText: 'Incident Type',
                           prefixIcon: Icon(Icons.category_outlined),
@@ -494,13 +496,6 @@ class _EmployeeDashboardPageState extends State<EmployeeDashboardPage> {
 // ─────────────────────────── Sessions Tab ───────────────────────────────────
 
 class _SessionsTab extends StatelessWidget {
-  final String userName;
-  final ConnectionStatus cameraStatus;
-  final String? lastDetectedPlate;
-  final VoidCallback onCheckIn;
-  final VoidCallback onIncident;
-  final VoidCallback onLotMap;
-  final VoidCallback onLogout;
 
   const _SessionsTab({
     required this.userName,
@@ -511,6 +506,13 @@ class _SessionsTab extends StatelessWidget {
     required this.onLotMap,
     required this.onLogout,
   });
+  final String userName;
+  final ConnectionStatus cameraStatus;
+  final String? lastDetectedPlate;
+  final VoidCallback onCheckIn;
+  final VoidCallback onIncident;
+  final VoidCallback onLotMap;
+  final VoidCallback onLogout;
 
   @override
   Widget build(BuildContext context) {
@@ -560,9 +562,9 @@ class _SessionsTab extends StatelessWidget {
             ),
             titlePadding: const EdgeInsets.only(left: 20, bottom: 14),
             collapseMode: CollapseMode.parallax,
-            title: Text(
+            title: const Text(
               'Active Sessions',
-              style: const TextStyle(
+              style: TextStyle(
                 color: Colors.white,
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
@@ -593,12 +595,12 @@ class _SessionsTab extends StatelessWidget {
                   ]),
                 ),
                 const PopupMenuDivider(),
-                PopupMenuItem(
+                const PopupMenuItem(
                   value: 'logout',
                   child: Row(children: [
                     Icon(Icons.logout,
                         size: 20, color: AppTheme.errorColor),
-                    const SizedBox(width: 10),
+                    SizedBox(width: 10),
                     Text('Sign Out',
                         style: TextStyle(color: AppTheme.errorColor)),
                   ]),
@@ -716,9 +718,9 @@ class _EmptySessionsState extends StatelessWidget {
 // ─────────────────────────── Session Card ───────────────────────────────────
 
 class _SessionCard extends StatelessWidget {
-  final ParkingSession session;
 
   const _SessionCard({required this.session});
+  final ParkingSession session;
 
   @override
   Widget build(BuildContext context) {
@@ -892,9 +894,9 @@ class _SessionCard extends StatelessWidget {
 }
 
 class _StatusBadge extends StatelessWidget {
-  final SessionStatus status;
 
   const _StatusBadge({required this.status});
+  final SessionStatus status;
 
   @override
   Widget build(BuildContext context) {
@@ -936,15 +938,15 @@ class _StatusBadge extends StatelessWidget {
 }
 
 class _DetailPill extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final Color color;
 
   const _DetailPill({
     required this.icon,
     required this.label,
     required this.color,
   });
+  final IconData icon;
+  final String label;
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
@@ -974,11 +976,6 @@ class _DetailPill extends StatelessWidget {
 }
 
 class _ActionButton extends StatelessWidget {
-  final String label;
-  final IconData icon;
-  final VoidCallback onTap;
-  final Color color;
-  final bool filled;
 
   const _ActionButton({
     required this.label,
@@ -987,6 +984,11 @@ class _ActionButton extends StatelessWidget {
     required this.color,
     required this.filled,
   });
+  final String label;
+  final IconData icon;
+  final VoidCallback onTap;
+  final Color color;
+  final bool filled;
 
   @override
   Widget build(BuildContext context) {
@@ -1023,9 +1025,9 @@ class _ActionButton extends StatelessWidget {
 // ─────────────────────────── Camera Status Badge ─────────────────────────────
 
 class _CameraStatusBadge extends StatelessWidget {
-  final ConnectionStatus status;
 
   const _CameraStatusBadge({required this.status});
+  final ConnectionStatus status;
 
   @override
   Widget build(BuildContext context) {
@@ -1090,15 +1092,15 @@ class _CameraStatusBadge extends StatelessWidget {
 // ─────────────────────────── Profile Tab ─────────────────────────────────────
 
 class _ProfileTab extends StatelessWidget {
-  final String userName;
-  final VoidCallback onLogout;
-  final VoidCallback onIncident;
 
   const _ProfileTab({
     required this.userName,
     required this.onLogout,
     required this.onIncident,
   });
+  final String userName;
+  final VoidCallback onLogout;
+  final VoidCallback onIncident;
 
   @override
   Widget build(BuildContext context) {
@@ -1184,10 +1186,6 @@ class _ProfileTab extends StatelessWidget {
 }
 
 class _ProfileMenuItem extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final Color color;
-  final VoidCallback onTap;
 
   const _ProfileMenuItem({
     required this.icon,
@@ -1195,6 +1193,10 @@ class _ProfileMenuItem extends StatelessWidget {
     required this.color,
     required this.onTap,
   });
+  final IconData icon;
+  final String label;
+  final Color color;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {

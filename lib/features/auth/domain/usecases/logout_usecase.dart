@@ -6,9 +6,9 @@ import 'package:parkflow_manager/features/auth/domain/repositories/auth_reposito
 
 @injectable
 class LogoutUseCase extends UseCase<void, NoParams> {
-  final AuthRepository repository;
 
   LogoutUseCase({required this.repository});
+  final AuthRepository repository;
 
   @override
   Future<Either<Failure, void>> call(NoParams params) {

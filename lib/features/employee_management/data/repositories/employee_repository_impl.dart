@@ -11,10 +11,6 @@ import 'package:parkflow_manager/features/parking_session/data/datasources/sessi
 
 @Injectable(as: EmployeeRepository)
 class EmployeeRepositoryImpl implements EmployeeRepository {
-  final EmployeeLocalDataSource localDataSource;
-  final EmployeeRemoteDataSource remoteDataSource;
-  final SessionLocalDataSource sessionLocalDataSource;
-  final NetworkInfo networkInfo;
 
   EmployeeRepositoryImpl({
     required this.localDataSource,
@@ -22,6 +18,10 @@ class EmployeeRepositoryImpl implements EmployeeRepository {
     required this.sessionLocalDataSource,
     required this.networkInfo,
   });
+  final EmployeeLocalDataSource localDataSource;
+  final EmployeeRemoteDataSource remoteDataSource;
+  final SessionLocalDataSource sessionLocalDataSource;
+  final NetworkInfo networkInfo;
 
   @override
   Future<Either<Failure, List<Employee>>> getEmployees(String lotId) async {
@@ -39,7 +39,7 @@ class EmployeeRepositoryImpl implements EmployeeRepository {
     try {
       final localEmployees = await localDataSource.getEmployees(lotId);
       return Right(
-        localEmployees.map((e) => _mapDataToEntity(e)).toList(),
+        localEmployees.map(_mapDataToEntity).toList(),
       );
     } catch (e) {
       return Left(CacheFailure(message: 'Failed to get employees: $e'));
@@ -129,7 +129,7 @@ class EmployeeRepositoryImpl implements EmployeeRepository {
           .toList();
 
       var cashCollected = 0.0;
-      var digitalCollected = 0.0;
+      const digitalCollected = 0.0;
 
       for (final session in employeeSessions) {
         // Simplified — in production fetch from payments table

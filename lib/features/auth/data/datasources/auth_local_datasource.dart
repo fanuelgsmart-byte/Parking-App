@@ -15,13 +15,13 @@ abstract class AuthLocalDataSource {
 
 @Injectable(as: AuthLocalDataSource)
 class AuthLocalDataSourceImpl implements AuthLocalDataSource {
+
+  AuthLocalDataSourceImpl({required this.secureStorage});
   final FlutterSecureStorage secureStorage;
 
   static const _userKey = 'cached_user';
   static const _accessTokenKey = 'access_token';
   static const _refreshTokenKey = 'refresh_token';
-
-  AuthLocalDataSourceImpl({required this.secureStorage});
 
   @override
   Future<void> cacheUser(UserModel user) async {

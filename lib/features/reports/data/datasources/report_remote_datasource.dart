@@ -25,9 +25,9 @@ abstract class ReportRemoteDataSource {
 
 @Injectable(as: ReportRemoteDataSource)
 class ReportRemoteDataSourceImpl implements ReportRemoteDataSource {
-  final ApiClient apiClient;
 
   ReportRemoteDataSourceImpl({required this.apiClient});
+  final ApiClient apiClient;
 
   @override
   Future<Map<String, dynamic>> getRevenueReport(

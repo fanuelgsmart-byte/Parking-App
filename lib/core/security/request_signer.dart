@@ -11,6 +11,9 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 /// The server validates the timestamp is within a 5-minute window to
 /// prevent replay attacks, and verifies the HMAC matches.
 class RequestSigner {
+
+  RequestSigner({required FlutterSecureStorage secureStorage})
+      : _secureStorage = secureStorage;
   final FlutterSecureStorage _secureStorage;
 
   static const _hmacKeyName = 'parkflow_hmac_key';
@@ -22,9 +25,6 @@ class RequestSigner {
     '/payments/qr',   // request QR code
     '/employees',     // add/modify employee
   ];
-
-  RequestSigner({required FlutterSecureStorage secureStorage})
-      : _secureStorage = secureStorage;
 
   /// Returns true if this request path requires signing.
   bool shouldSign(String method, String path) {

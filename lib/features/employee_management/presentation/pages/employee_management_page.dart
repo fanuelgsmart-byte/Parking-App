@@ -7,9 +7,9 @@ import 'package:parkflow_manager/features/employee_management/domain/entities/em
 import 'package:parkflow_manager/features/employee_management/presentation/bloc/employee_cubit.dart';
 
 class EmployeeManagementPage extends StatefulWidget {
-  final String lotId;
 
   const EmployeeManagementPage({super.key, required this.lotId});
+  final String lotId;
 
   @override
   State<EmployeeManagementPage> createState() => _EmployeeManagementPageState();
@@ -203,8 +203,8 @@ class _EmployeeManagementPageState extends State<EmployeeManagementPage> {
         bloc: context.read<EmployeeCubit>(),
         builder: (ctx, state) {
           if (state is EmployeeLoading) {
-            return _Sheet(
-              child: const SizedBox(
+            return const _Sheet(
+              child: SizedBox(
                 height: 100,
                 child: LoadingIndicator(message: 'Loading shift...'),
               ),
@@ -223,15 +223,15 @@ class _EmployeeManagementPageState extends State<EmployeeManagementPage> {
 // ──────────────────────────── Employee Card ───────────────────────────────────
 
 class _EmployeeCard extends StatelessWidget {
-  final Employee employee;
-  final void Function(String id) onDeactivate;
-  final void Function(String id) onViewShift;
 
   const _EmployeeCard({
     required this.employee,
     required this.onDeactivate,
     required this.onViewShift,
   });
+  final Employee employee;
+  final void Function(String id) onDeactivate;
+  final void Function(String id) onViewShift;
 
   Color get _roleColor =>
       employee.role == 'manager' ? AppTheme.warningColor : AppTheme.primary;
@@ -413,10 +413,10 @@ class _EmployeeCard extends StatelessWidget {
 // ──────────────────────────── Add Employee Sheet ─────────────────────────────
 
 class _AddEmployeeSheet extends StatefulWidget {
-  final String lotId;
-  final void Function(Employee) onAdd;
 
   const _AddEmployeeSheet({required this.lotId, required this.onAdd});
+  final String lotId;
+  final void Function(Employee) onAdd;
 
   @override
   State<_AddEmployeeSheet> createState() => _AddEmployeeSheetState();
@@ -475,7 +475,7 @@ class _AddEmployeeSheetState extends State<_AddEmployeeSheet> {
               ),
               const SizedBox(height: 14),
               DropdownButtonFormField<String>(
-                value: _selectedRole,
+                initialValue: _selectedRole,
                 decoration: const InputDecoration(
                   labelText: 'Role',
                   prefixIcon: Icon(Icons.badge_rounded),
@@ -534,9 +534,9 @@ class _AddEmployeeSheetState extends State<_AddEmployeeSheet> {
 // ──────────────────────────── Shift Summary Sheet ────────────────────────────
 
 class _ShiftSummarySheet extends StatelessWidget {
-  final ShiftSummary summary;
 
   const _ShiftSummarySheet({required this.summary});
+  final ShiftSummary summary;
 
   @override
   Widget build(BuildContext context) {
@@ -589,10 +589,6 @@ class _ShiftSummarySheet extends StatelessWidget {
 }
 
 class _ShiftStat extends StatelessWidget {
-  final String label;
-  final String value;
-  final IconData icon;
-  final Color color;
 
   const _ShiftStat({
     required this.label,
@@ -600,6 +596,10 @@ class _ShiftStat extends StatelessWidget {
     required this.icon,
     required this.color,
   });
+  final String label;
+  final String value;
+  final IconData icon;
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
@@ -636,10 +636,10 @@ class _ShiftStat extends StatelessWidget {
 }
 
 class _SummaryRow extends StatelessWidget {
-  final String label;
-  final String value;
 
   const _SummaryRow({required this.label, required this.value});
+  final String label;
+  final String value;
 
   @override
   Widget build(BuildContext context) {
@@ -669,9 +669,9 @@ class _SummaryRow extends StatelessWidget {
 // ──────────────────────────── Empty State ────────────────────────────────────
 
 class _EmptyState extends StatelessWidget {
-  final bool hasQuery;
 
   const _EmptyState({required this.hasQuery});
+  final bool hasQuery;
 
   @override
   Widget build(BuildContext context) {
@@ -702,9 +702,9 @@ class _EmptyState extends StatelessWidget {
 // ──────────────────────────── Sheet Container ────────────────────────────────
 
 class _Sheet extends StatelessWidget {
-  final Widget child;
 
   const _Sheet({required this.child});
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {

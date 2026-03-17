@@ -17,9 +17,9 @@ abstract class CheckoutEvent extends Equatable {
 }
 
 class CheckoutLoadSession extends CheckoutEvent {
-  final int sessionId;
 
   const CheckoutLoadSession({required this.sessionId});
+  final int sessionId;
 
   @override
   List<Object?> get props => [sessionId];
@@ -34,9 +34,9 @@ class CheckoutRequestQr extends CheckoutEvent {
 }
 
 class CheckoutConfirmDigital extends CheckoutEvent {
-  final String transactionRef;
 
   const CheckoutConfirmDigital({required this.transactionRef});
+  final String transactionRef;
 
   @override
   List<Object?> get props => [transactionRef];
@@ -60,30 +60,30 @@ class CheckoutLoading extends CheckoutState {
 }
 
 class CheckoutReady extends CheckoutState {
-  final ParkingSession session;
-  final double fee;
-  final double ratePerHour;
 
   const CheckoutReady({
     required this.session,
     required this.fee,
     required this.ratePerHour,
   });
+  final ParkingSession session;
+  final double fee;
+  final double ratePerHour;
 
   @override
   List<Object?> get props => [session, fee, ratePerHour];
 }
 
 class CheckoutQrGenerated extends CheckoutState {
-  final ParkingSession session;
-  final double fee;
-  final String qrCodeUrl;
 
   const CheckoutQrGenerated({
     required this.session,
     required this.fee,
     required this.qrCodeUrl,
   });
+  final ParkingSession session;
+  final double fee;
+  final String qrCodeUrl;
 
   @override
   List<Object?> get props => [session, fee, qrCodeUrl];
@@ -94,18 +94,18 @@ class CheckoutProcessing extends CheckoutState {
 }
 
 class CheckoutSuccess extends CheckoutState {
-  final Payment payment;
 
   const CheckoutSuccess({required this.payment});
+  final Payment payment;
 
   @override
   List<Object?> get props => [payment];
 }
 
 class CheckoutError extends CheckoutState {
-  final String message;
 
   const CheckoutError({required this.message});
+  final String message;
 
   @override
   List<Object?> get props => [message];
@@ -115,14 +115,6 @@ class CheckoutError extends CheckoutState {
 
 @injectable
 class CheckoutBloc extends Bloc<CheckoutEvent, CheckoutState> {
-  final ParkingSessionRepository sessionRepository;
-  final PaymentRepository paymentRepository;
-  final CalculateFee calculateFee;
-
-  ParkingSession? _currentSession;
-  double _currentFee = 0;
-  // Default rate; will be fetched from rate config in production
-  final double _ratePerHour = 5.0;
 
   CheckoutBloc({
     required this.sessionRepository,
@@ -134,6 +126,14 @@ class CheckoutBloc extends Bloc<CheckoutEvent, CheckoutState> {
     on<CheckoutRequestQr>(_onRequestQr);
     on<CheckoutConfirmDigital>(_onConfirmDigital);
   }
+  final ParkingSessionRepository sessionRepository;
+  final PaymentRepository paymentRepository;
+  final CalculateFee calculateFee;
+
+  ParkingSession? _currentSession;
+  double _currentFee = 0;
+  // Default rate; will be fetched from rate config in production
+  final double _ratePerHour = 5.0;
 
   Future<void> _onLoadSession(
     CheckoutLoadSession event,

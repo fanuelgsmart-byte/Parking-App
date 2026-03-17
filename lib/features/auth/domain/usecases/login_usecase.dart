@@ -7,9 +7,9 @@ import 'package:parkflow_manager/features/auth/domain/repositories/auth_reposito
 
 @injectable
 class LoginUseCase extends UseCase<User, LoginParams> {
-  final AuthRepository repository;
 
   LoginUseCase({required this.repository});
+  final AuthRepository repository;
 
   @override
   Future<Either<Failure, User>> call(LoginParams params) {
@@ -18,8 +18,8 @@ class LoginUseCase extends UseCase<User, LoginParams> {
 }
 
 class LoginParams {
-  final String email;
-  final String password;
 
   const LoginParams({required this.email, required this.password});
+  final String email;
+  final String password;
 }

@@ -23,9 +23,9 @@ abstract class ReportLocalDataSource {
 
 @Injectable(as: ReportLocalDataSource)
 class ReportLocalDataSourceImpl implements ReportLocalDataSource {
-  final AppDatabase database;
 
   ReportLocalDataSourceImpl({required this.database});
+  final AppDatabase database;
 
   @override
   Future<List<ParkingSessionData>> getCompletedSessionsByDateRange(

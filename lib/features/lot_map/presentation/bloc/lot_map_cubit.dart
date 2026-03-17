@@ -24,24 +24,24 @@ class LotMapLoading extends LotMapState {
 }
 
 class LotMapLoaded extends LotMapState {
-  final List<ParkingSpot> spots;
-  final int totalSpots;
-  final int availableSpots;
 
   const LotMapLoaded({
     required this.spots,
     required this.totalSpots,
     required this.availableSpots,
   });
+  final List<ParkingSpot> spots;
+  final int totalSpots;
+  final int availableSpots;
 
   @override
   List<Object?> get props => [spots, totalSpots, availableSpots];
 }
 
 class LotMapError extends LotMapState {
-  final String message;
 
   const LotMapError({required this.message});
+  final String message;
 
   @override
   List<Object?> get props => [message];
@@ -51,10 +51,10 @@ class LotMapError extends LotMapState {
 
 @injectable
 class LotMapCubit extends Cubit<LotMapState> {
-  final LotRepository lotRepository;
-  StreamSubscription<List<ParkingSpot>>? _spotsSubscription;
 
   LotMapCubit({required this.lotRepository}) : super(const LotMapInitial());
+  final LotRepository lotRepository;
+  StreamSubscription<List<ParkingSpot>>? _spotsSubscription;
 
   Future<void> loadSpots(String lotId) async {
     emit(const LotMapLoading());
@@ -71,7 +71,7 @@ class LotMapCubit extends Cubit<LotMapState> {
   void _watchSpots(String lotId) {
     _spotsSubscription?.cancel();
     _spotsSubscription = lotRepository.watchSpots(lotId).listen(
-          (spots) => _emitLoaded(spots),
+          _emitLoaded,
         );
   }
 

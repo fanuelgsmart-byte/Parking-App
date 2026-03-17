@@ -22,36 +22,36 @@ class EmployeeLoading extends EmployeeState {
 }
 
 class EmployeeListLoaded extends EmployeeState {
-  final List<Employee> employees;
 
   const EmployeeListLoaded({required this.employees});
+  final List<Employee> employees;
 
   @override
   List<Object?> get props => [employees];
 }
 
 class EmployeeActionSuccess extends EmployeeState {
-  final String message;
 
   const EmployeeActionSuccess({required this.message});
+  final String message;
 
   @override
   List<Object?> get props => [message];
 }
 
 class ShiftSummaryLoaded extends EmployeeState {
-  final ShiftSummary summary;
 
   const ShiftSummaryLoaded({required this.summary});
+  final ShiftSummary summary;
 
   @override
   List<Object?> get props => [summary];
 }
 
 class EmployeeError extends EmployeeState {
-  final String message;
 
   const EmployeeError({required this.message});
+  final String message;
 
   @override
   List<Object?> get props => [message];
@@ -61,10 +61,10 @@ class EmployeeError extends EmployeeState {
 
 @injectable
 class EmployeeCubit extends Cubit<EmployeeState> {
-  final EmployeeRepository repository;
-  String? _currentLotId;
 
   EmployeeCubit({required this.repository}) : super(const EmployeeInitial());
+  final EmployeeRepository repository;
+  String? _currentLotId;
 
   Future<void> loadEmployees(String lotId) async {
     _currentLotId = lotId;

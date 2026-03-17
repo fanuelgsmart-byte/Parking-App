@@ -10,15 +10,15 @@ import 'package:parkflow_manager/features/auth/domain/repositories/auth_reposito
 
 @Injectable(as: AuthRepository)
 class AuthRepositoryImpl implements AuthRepository {
-  final AuthRemoteDataSource remoteDataSource;
-  final AuthLocalDataSource localDataSource;
-  final NetworkInfo networkInfo;
 
   AuthRepositoryImpl({
     required this.remoteDataSource,
     required this.localDataSource,
     required this.networkInfo,
   });
+  final AuthRemoteDataSource remoteDataSource;
+  final AuthLocalDataSource localDataSource;
+  final NetworkInfo networkInfo;
 
   @override
   Future<Either<Failure, User>> login(String email, String password) async {

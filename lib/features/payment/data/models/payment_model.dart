@@ -1,14 +1,6 @@
 import 'package:parkflow_manager/features/payment/domain/entities/payment.dart';
 
 class PaymentModel {
-  final int id;
-  final int sessionId;
-  final double amount;
-  final String method;
-  final String status;
-  final String? transactionRef;
-  final DateTime? paidAt;
-  final bool isSynced;
 
   const PaymentModel({
     required this.id,
@@ -35,6 +27,14 @@ class PaymentModel {
       isSynced: json['is_synced'] as bool? ?? true,
     );
   }
+  final int id;
+  final int sessionId;
+  final double amount;
+  final String method;
+  final String status;
+  final String? transactionRef;
+  final DateTime? paidAt;
+  final bool isSynced;
 
   Map<String, dynamic> toJson() {
     return {

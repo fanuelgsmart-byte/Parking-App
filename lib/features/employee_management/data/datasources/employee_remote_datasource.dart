@@ -13,9 +13,9 @@ abstract class EmployeeRemoteDataSource {
 
 @Injectable(as: EmployeeRemoteDataSource)
 class EmployeeRemoteDataSourceImpl implements EmployeeRemoteDataSource {
-  final ApiClient apiClient;
 
   EmployeeRemoteDataSourceImpl({required this.apiClient});
+  final ApiClient apiClient;
 
   @override
   Future<List<Employee>> getEmployees(String lotId) async {

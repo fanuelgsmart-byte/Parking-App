@@ -11,9 +11,9 @@ import 'package:parkflow_manager/features/lot_map/presentation/pages/lot_map_pag
 import 'package:parkflow_manager/features/payment/presentation/pages/checkout_page.dart';
 
 class AppRouter {
-  final AuthBloc authBloc;
 
   AppRouter({required this.authBloc});
+  final AuthBloc authBloc;
 
   late final GoRouter router = GoRouter(
     initialLocation: '/login',

@@ -1,11 +1,6 @@
 import 'package:parkflow_manager/features/auth/domain/entities/user.dart';
 
 class UserModel {
-  final String id;
-  final String name;
-  final String email;
-  final String role;
-  final String? assignedLotId;
 
   const UserModel({
     required this.id,
@@ -25,6 +20,21 @@ class UserModel {
     );
   }
 
+  factory UserModel.fromEntity(User user) {
+    return UserModel(
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      assignedLotId: user.assignedLotId,
+    );
+  }
+  final String id;
+  final String name;
+  final String email;
+  final String role;
+  final String? assignedLotId;
+
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -42,16 +52,6 @@ class UserModel {
       email: email,
       role: role,
       assignedLotId: assignedLotId,
-    );
-  }
-
-  factory UserModel.fromEntity(User user) {
-    return UserModel(
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      assignedLotId: user.assignedLotId,
     );
   }
 }

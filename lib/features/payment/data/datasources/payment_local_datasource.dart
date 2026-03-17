@@ -15,9 +15,9 @@ abstract class PaymentLocalDataSource {
 
 @Injectable(as: PaymentLocalDataSource)
 class PaymentLocalDataSourceImpl implements PaymentLocalDataSource {
-  final AppDatabase database;
 
   PaymentLocalDataSourceImpl({required this.database});
+  final AppDatabase database;
 
   @override
   Future<int> insertPayment(PaymentsCompanion payment) {

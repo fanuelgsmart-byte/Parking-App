@@ -16,10 +16,6 @@ import 'package:parkflow_manager/features/parking_session/domain/repositories/pa
 
 @Injectable(as: ParkingSessionRepository)
 class ParkingSessionRepositoryImpl implements ParkingSessionRepository {
-  final SessionLocalDataSource localDataSource;
-  final SessionRemoteDataSource remoteDataSource;
-  final NetworkInfo networkInfo;
-  final AppDatabase database;
 
   ParkingSessionRepositoryImpl({
     required this.localDataSource,
@@ -27,6 +23,10 @@ class ParkingSessionRepositoryImpl implements ParkingSessionRepository {
     required this.networkInfo,
     required this.database,
   });
+  final SessionLocalDataSource localDataSource;
+  final SessionRemoteDataSource remoteDataSource;
+  final NetworkInfo networkInfo;
+  final AppDatabase database;
 
   @override
   Future<Either<Failure, List<ParkingSession>>> getActiveSessions(
@@ -43,7 +43,7 @@ class ParkingSessionRepositoryImpl implements ParkingSessionRepository {
   @override
   Stream<List<ParkingSession>> watchActiveSessions(String lotId) {
     return localDataSource.watchActiveSessions(lotId).asyncMap(
-          (sessions) => _mapSessionDataToEntities(sessions),
+          _mapSessionDataToEntities,
         );
   }
 
@@ -250,14 +250,14 @@ class ParkingSessionRepositoryImpl implements ParkingSessionRepository {
   }
 
   Future<void> _queueForSync(
-    String tableName,
+    String entityName,
     int recordId,
     String operation,
     Map<String, dynamic> payload,
   ) async {
     await database.into(database.syncQueue).insert(
           SyncQueueCompanion(
-            tableName: Value(tableName),
+            entityName: Value(entityName),
             recordId: Value(recordId),
             operation: Value(operation),
             payload: Value(jsonEncode(payload)),

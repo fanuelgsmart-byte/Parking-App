@@ -13,9 +13,9 @@ abstract class SessionRemoteDataSource {
 
 @Injectable(as: SessionRemoteDataSource)
 class SessionRemoteDataSourceImpl implements SessionRemoteDataSource {
-  final ApiClient apiClient;
 
   SessionRemoteDataSourceImpl({required this.apiClient});
+  final ApiClient apiClient;
 
   @override
   Future<List<ParkingSessionModel>> getActiveSessions(String lotId) async {

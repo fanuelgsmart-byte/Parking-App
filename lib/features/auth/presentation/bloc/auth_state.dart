@@ -1,4 +1,6 @@
 import 'package:equatable/equatable.dart';
+import 'package:parkflow_manager/core/session/app_session_context.dart';
+import 'package:parkflow_manager/features/auth/domain/entities/auth_session.dart';
 import 'package:parkflow_manager/features/auth/domain/entities/user.dart';
 
 abstract class AuthState extends Equatable {
@@ -17,12 +19,15 @@ class AuthLoading extends AuthState {
 }
 
 class AuthAuthenticated extends AuthState {
+  const AuthAuthenticated({required this.session});
 
-  const AuthAuthenticated({required this.user});
-  final User user;
+  final AuthSession session;
+
+  User get user => session.user;
+  AppSessionContext get context => session.context;
 
   @override
-  List<Object?> get props => [user];
+  List<Object?> get props => [session];
 }
 
 class AuthUnauthenticated extends AuthState {
@@ -30,8 +35,8 @@ class AuthUnauthenticated extends AuthState {
 }
 
 class AuthError extends AuthState {
-
   const AuthError({required this.message});
+
   final String message;
 
   @override

@@ -1,7 +1,6 @@
 import 'package:parkflow_manager/features/auth/domain/entities/user.dart';
 
 class UserModel {
-
   const UserModel({
     required this.id,
     required this.name,
@@ -15,7 +14,10 @@ class UserModel {
       id: json['id'] as String,
       name: json['name'] as String,
       email: json['email'] as String,
-      role: json['role'] as String,
+      role: UserRole.values.firstWhere(
+        (value) => value.name == (json['role'] as String),
+        orElse: () => UserRole.employee,
+      ),
       assignedLotId: json['assigned_lot_id'] as String?,
     );
   }
@@ -29,10 +31,11 @@ class UserModel {
       assignedLotId: user.assignedLotId,
     );
   }
+
   final String id;
   final String name;
   final String email;
-  final String role;
+  final UserRole role;
   final String? assignedLotId;
 
   Map<String, dynamic> toJson() {
@@ -40,7 +43,7 @@ class UserModel {
       'id': id,
       'name': name,
       'email': email,
-      'role': role,
+      'role': role.name,
       'assigned_lot_id': assignedLotId,
     };
   }

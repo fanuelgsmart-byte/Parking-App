@@ -1,0 +1,743 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ParkFlow Browser Flow</title>
+  <style>
+    :root {
+      --bg-0: #08111f;
+      --bg-1: #0b1528;
+      --bg-2: #10203c;
+      --panel: rgba(7, 17, 35, 0.78);
+      --panel-soft: rgba(10, 24, 50, 0.62);
+      --line: rgba(120, 146, 184, 0.28);
+      --text: #e4eefc;
+      --muted: #9cb1ce;
+      --accent: #53d4ff;
+      --accent-strong: #14b8f0;
+      --ok: #22c55e;
+      --warn: #f59e0b;
+      --danger: #ef4444;
+      --shadow: 0 30px 70px rgba(2, 8, 22, 0.45);
+      --radius-xl: 28px;
+      --radius-lg: 20px;
+      --radius-md: 14px;
+      --space: 18px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      background:
+        radial-gradient(1200px 500px at 8% -5%, rgba(83, 212, 255, 0.18), transparent),
+        radial-gradient(900px 420px at 98% -8%, rgba(20, 184, 240, 0.14), transparent),
+        linear-gradient(180deg, var(--bg-0), var(--bg-1) 55%, var(--bg-2));
+      color: var(--text);
+      font-family: "Segoe UI", "SF Pro Text", system-ui, -apple-system, sans-serif;
+      letter-spacing: 0.01em;
+    }
+
+    .wrap {
+      width: min(1240px, calc(100vw - 32px));
+      margin: 20px auto 34px;
+      display: grid;
+      gap: 16px;
+    }
+
+    .card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-xl);
+      background: linear-gradient(140deg, rgba(10, 22, 45, 0.92), var(--panel));
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+      overflow: hidden;
+    }
+
+    .hero {
+      padding: 24px;
+      display: grid;
+      grid-template-columns: 1.5fr 1fr;
+      gap: 16px;
+      align-items: stretch;
+    }
+
+    .title {
+      margin: 0;
+      font-size: clamp(2rem, 4vw, 3.4rem);
+      line-height: 0.95;
+      letter-spacing: -0.03em;
+    }
+
+    .subtitle {
+      margin: 12px 0 0;
+      color: var(--muted);
+      line-height: 1.65;
+      max-width: 70ch;
+      font-size: 1.02rem;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid rgba(83, 212, 255, 0.32);
+      color: var(--accent);
+      border-radius: 999px;
+      padding: 7px 12px;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-weight: 700;
+      background: rgba(83, 212, 255, 0.08);
+    }
+
+    .hero-right {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      align-content: start;
+    }
+
+    .metric {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      padding: 14px;
+      background: rgba(5, 13, 28, 0.58);
+    }
+
+    .metric label {
+      display: block;
+      font-size: 0.74rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 6px;
+    }
+
+    .metric strong { font-size: 1rem; }
+
+    .shell {
+      display: grid;
+      grid-template-columns: 330px 1fr;
+      gap: 16px;
+      min-height: 67vh;
+    }
+
+    .side {
+      padding: 16px;
+      background: linear-gradient(170deg, rgba(6, 15, 31, 0.9), rgba(8, 18, 38, 0.9));
+    }
+
+    .side h2, .main h2 {
+      margin: 2px 0 10px;
+      font-size: 0.78rem;
+      color: var(--muted);
+      letter-spacing: 0.11em;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    .flow-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .flow-item {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      padding: 12px;
+      background: rgba(15, 27, 52, 0.6);
+      cursor: pointer;
+      transition: 180ms ease;
+      transform: translateY(0);
+    }
+
+    .flow-item:hover {
+      border-color: rgba(83, 212, 255, 0.42);
+      transform: translateY(-1px);
+      background: rgba(16, 34, 68, 0.72);
+    }
+
+    .flow-item.active {
+      border-color: rgba(83, 212, 255, 0.7);
+      background: linear-gradient(150deg, rgba(83, 212, 255, 0.2), rgba(17, 35, 70, 0.8));
+    }
+
+    .flow-name {
+      font-weight: 700;
+      font-size: 0.98rem;
+      margin-bottom: 4px;
+    }
+
+    .flow-desc {
+      color: var(--muted);
+      font-size: 0.84rem;
+      line-height: 1.45;
+    }
+
+    .main {
+      padding: 16px;
+      display: grid;
+      gap: 12px;
+      background: linear-gradient(160deg, rgba(7, 16, 32, 0.92), rgba(8, 20, 40, 0.82));
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      justify-content: space-between;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      padding: 10px;
+      background: rgba(8, 18, 36, 0.75);
+    }
+
+    .pill {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 8px 12px;
+      color: var(--muted);
+      font-size: 0.82rem;
+      background: rgba(11, 23, 46, 0.8);
+    }
+
+    .btn {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 9px 12px;
+      color: var(--text);
+      background: rgba(14, 31, 60, 0.78);
+      cursor: pointer;
+      font-weight: 600;
+      transition: 180ms ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .btn:hover { border-color: rgba(83, 212, 255, 0.5); }
+    .btn.primary {
+      border-color: rgba(83, 212, 255, 0.66);
+      background: linear-gradient(145deg, rgba(40, 174, 219, 0.95), rgba(10, 128, 170, 0.95));
+      color: #032034;
+      font-weight: 700;
+    }
+
+    .btn.warn {
+      border-color: rgba(245, 158, 11, 0.52);
+      background: rgba(245, 158, 11, 0.14);
+      color: #fcd38d;
+    }
+
+    .content {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      background: rgba(4, 11, 25, 0.7);
+      min-height: 420px;
+      overflow: auto;
+      animation: fadeIn 220ms ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 12px;
+    }
+
+    .cell-4 { grid-column: span 4; }
+    .cell-6 { grid-column: span 6; }
+    .cell-8 { grid-column: span 8; }
+    .cell-12 { grid-column: span 12; }
+
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 13px;
+      background: rgba(8, 20, 42, 0.72);
+    }
+
+    .panel h3 {
+      margin: 0 0 7px;
+      font-size: 1rem;
+      letter-spacing: -0.01em;
+    }
+
+    .small {
+      font-size: 0.84rem;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .chip {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 5px 10px;
+      font-size: 0.75rem;
+      color: var(--muted);
+      background: rgba(10, 24, 47, 0.74);
+    }
+
+    .chip.ok { color: #bbf7d0; border-color: rgba(34, 197, 94, 0.44); }
+    .chip.warn { color: #fde68a; border-color: rgba(245, 158, 11, 0.5); }
+    .chip.danger { color: #fecaca; border-color: rgba(239, 68, 68, 0.5); }
+
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.84rem;
+    }
+
+    .table th, .table td {
+      text-align: left;
+      border-bottom: 1px solid rgba(121, 147, 185, 0.22);
+      padding: 8px 6px;
+      vertical-align: top;
+    }
+
+    .table th { color: var(--muted); font-weight: 600; font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.07em; }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.78rem;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(7, 19, 39, 0.7);
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      display: inline-block;
+    }
+
+    .dot.ok { background: var(--ok); }
+    .dot.warn { background: var(--warn); }
+    .dot.danger { background: var(--danger); }
+
+    .notice {
+      border: 1px solid rgba(83, 212, 255, 0.45);
+      background: rgba(24, 154, 201, 0.1);
+      border-radius: 14px;
+      padding: 10px 12px;
+      font-size: 0.84rem;
+      line-height: 1.4;
+      color: #c6f1ff;
+    }
+
+    @media (max-width: 1040px) {
+      .hero { grid-template-columns: 1fr; }
+      .shell { grid-template-columns: 1fr; }
+      .cell-4, .cell-6, .cell-8 { grid-column: span 12; }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <section class="card hero">
+      <div>
+        <div class="badge">Browser interactive mode</div>
+        <h1 class="title">ParkFlow UI + Flow Preview</h1>
+        <p class="subtitle">
+          This is a functional browser demo of the main parking operations flow: login, check-in,
+          checkout, payment confirmation, and manager reporting. It mirrors the enterprise workflow
+          while the Flutter web compiler issue is being fixed.
+        </p>
+      </div>
+      <aside class="hero-right">
+        <div class="metric">
+          <label>Rendering mode</label>
+          <strong>Local static runtime</strong>
+        </div>
+        <div class="metric">
+          <label>Flow coverage</label>
+          <strong>Auth -> Session -> Checkout -> Reports</strong>
+        </div>
+        <div class="metric">
+          <label>Environment</label>
+          <strong>http://127.0.0.1:8000</strong>
+        </div>
+      </aside>
+    </section>
+
+    <section class="card shell">
+      <aside class="side">
+        <h2>Flow Steps</h2>
+        <div id="flowList" class="flow-list"></div>
+      </aside>
+
+      <section class="main">
+        <div class="toolbar">
+          <div class="row">
+            <span id="scopeTag" class="pill">Lot context: LOT-A</span>
+            <span id="statusTag" class="status"><span class="dot ok"></span> Ready</span>
+          </div>
+          <div class="row">
+            <button id="backBtn" class="btn">Back</button>
+            <button id="nextBtn" class="btn primary">Next</button>
+            <button id="resetBtn" class="btn warn">Reset flow</button>
+          </div>
+        </div>
+
+        <div id="content" class="content"></div>
+      </section>
+    </section>
+  </main>
+
+  <script>
+    const state = {
+      step: 0,
+      lotId: 'LOT-A',
+      user: null,
+      sessions: [
+        { id: 'SES-201', plate: 'KDA 430F', spot: 'A-12', size: 'SUV', started: '08:11', status: 'open', amount: null },
+        { id: 'SES-202', plate: 'KCY 977P', spot: 'A-03', size: 'Sedan', started: '08:34', status: 'open', amount: null },
+      ],
+      activeCheckout: null,
+      checkoutRateBySize: { Sedan: 120, SUV: 180, Truck: 240 },
+      report: {
+        revenueToday: 34200,
+        openSessions: 17,
+        completionRate: 96.2,
+        deadLetter: 0,
+      }
+    };
+
+    const steps = [
+      { name: 'Login', desc: 'Authenticate and establish required lot context.' },
+      { name: 'Employee Dashboard', desc: 'View open sessions and create check-ins.' },
+      { name: 'Flag For Checkout', desc: 'Mark a session as checkout-ready.' },
+      { name: 'Payment + Complete', desc: 'Confirm payment before completion.' },
+      { name: 'Manager Reports', desc: 'Server-authoritative metrics snapshot.' },
+    ];
+
+    const flowList = document.getElementById('flowList');
+    const content = document.getElementById('content');
+    const scopeTag = document.getElementById('scopeTag');
+    const statusTag = document.getElementById('statusTag');
+    const backBtn = document.getElementById('backBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const resetBtn = document.getElementById('resetBtn');
+
+    function esc(str) {
+      return String(str).replace(/[&<>"']/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[m]));
+    }
+
+    function money(n) {
+      return `KES ${Number(n).toLocaleString('en-KE')}`;
+    }
+
+    function setStatus(kind, label) {
+      const dot = kind === 'ok' ? 'ok' : kind === 'warn' ? 'warn' : 'danger';
+      statusTag.innerHTML = `<span class="dot ${dot}"></span> ${esc(label)}`;
+    }
+
+    function calcAmount(session) {
+      const rate = state.checkoutRateBySize[session.size] || 120;
+      const hours = 2.25;
+      return Math.round(rate * hours);
+    }
+
+    function renderFlowList() {
+      flowList.innerHTML = '';
+      steps.forEach((s, index) => {
+        const item = document.createElement('div');
+        item.className = `flow-item ${state.step === index ? 'active' : ''}`;
+        item.innerHTML = `<div class="flow-name">${index + 1}. ${esc(s.name)}</div><div class="flow-desc">${esc(s.desc)}</div>`;
+        item.onclick = () => { state.step = index; render(); };
+        flowList.appendChild(item);
+      });
+    }
+
+    function panel(html, span = 12) {
+      return `<section class="panel cell-${span}">${html}</section>`;
+    }
+
+    function sessionRows() {
+      return state.sessions.map(s => {
+        const chipClass = s.status === 'open' ? 'ok' : s.status === 'flagged' ? 'warn' : 'danger';
+        return `<tr>
+          <td>${esc(s.id)}</td>
+          <td>${esc(s.plate)}</td>
+          <td>${esc(s.spot)}</td>
+          <td>${esc(s.size)}</td>
+          <td>${esc(s.started)}</td>
+          <td><span class="chip ${chipClass}">${esc(s.status)}</span></td>
+        </tr>`;
+      }).join('');
+    }
+
+    function loginView() {
+      setStatus('ok', 'Awaiting secure login');
+      return `
+        <div class="grid">
+          ${panel(`
+            <h3>Sign in</h3>
+            <p class="small">This simulates enterprise login with explicit lot scope. No silent defaults are allowed.</p>
+            <div class="row" style="margin-top:10px">
+              <button class="btn primary" onclick="appLogin()">Sign in as Employee (LOT-A)</button>
+              <button class="btn" onclick="appLogin('manager')">Sign in as Manager (LOT-A)</button>
+            </div>
+          `, 8)}
+          ${panel(`
+            <h3>Security posture</h3>
+            <div class="row">
+              <span class="chip ok">Token required</span>
+              <span class="chip ok">Lot context required</span>
+              <span class="chip warn">Refresh flow simulated</span>
+            </div>
+            <p class="small" style="margin-top:10px">Real app currently runs natively while browser toolchain is repaired.</p>
+          `, 4)}
+        </div>
+      `;
+    }
+
+    function dashboardView() {
+      setStatus('ok', 'Employee operations active');
+      return `
+        <div class="grid">
+          ${panel(`
+            <h3>Open sessions</h3>
+            <table class="table">
+              <thead>
+                <tr><th>Session</th><th>Plate</th><th>Spot</th><th>Size</th><th>Started</th><th>Status</th></tr>
+              </thead>
+              <tbody>${sessionRows()}</tbody>
+            </table>
+          `, 8)}
+          ${panel(`
+            <h3>Quick check-in</h3>
+            <p class="small">Creates a new open session with typed vehicle size.</p>
+            <div class="row" style="margin-top:8px">
+              <button class="btn" onclick="appCheckIn('KDG 110Q','A-08','Sedan')">Sedan check-in</button>
+              <button class="btn" onclick="appCheckIn('KDD 455T','A-10','SUV')">SUV check-in</button>
+            </div>
+          `, 4)}
+          ${panel(`
+            <h3>Architecture note</h3>
+            <p class="small">In the hardened flow, only application-layer actions perform check-in and status updates.</p>
+          `, 12)}
+        </div>
+      `;
+    }
+
+    function flagView() {
+      const open = state.sessions.filter(s => s.status === 'open');
+      setStatus(open.length ? 'warn' : 'ok', open.length ? 'Sessions ready to flag' : 'No open sessions left');
+      return `
+        <div class="grid">
+          ${panel(`
+            <h3>Flag session for checkout</h3>
+            <p class="small">Flagged sessions remain visible and actionable until payment confirmation.</p>
+            <div class="row" style="margin-top:10px">
+              ${open.map(s => `<button class="btn" onclick="appFlag('${esc(s.id)}')">Flag ${esc(s.id)} (${esc(s.plate)})</button>`).join('') || '<span class="chip ok">All sessions already flagged/completed</span>'}
+            </div>
+          `, 12)}
+          ${panel(`
+            <h3>Current session table</h3>
+            <table class="table">
+              <thead>
+                <tr><th>ID</th><th>Plate</th><th>Spot</th><th>Status</th></tr>
+              </thead>
+              <tbody>
+                ${state.sessions.map(s => `<tr><td>${esc(s.id)}</td><td>${esc(s.plate)}</td><td>${esc(s.spot)}</td><td><span class="chip ${s.status === 'flagged' ? 'warn' : s.status === 'open' ? 'ok' : 'danger'}">${esc(s.status)}</span></td></tr>`).join('')}
+              </tbody>
+            </table>
+          `, 12)}
+        </div>
+      `;
+    }
+
+    function paymentView() {
+      const flagged = state.sessions.filter(s => s.status === 'flagged');
+      const active = state.activeCheckout;
+      setStatus(flagged.length || active ? 'warn' : 'ok', active ? `Awaiting payment for ${active.id}` : 'Select session for checkout');
+      return `
+        <div class="grid">
+          ${panel(`
+            <h3>Checkout queue</h3>
+            <p class="small">Completion is blocked until payment status is confirmed.</p>
+            <div class="row" style="margin-top:8px">
+              ${flagged.map(s => `<button class="btn" onclick="appStartCheckout('${esc(s.id)}')">Start ${esc(s.id)} (${money(calcAmount(s))})</button>`).join('') || '<span class="chip">No flagged sessions</span>'}
+            </div>
+          `, 7)}
+          ${panel(`
+            <h3>Digital payment state</h3>
+            ${active ? `
+              <p class="small">Session: <strong>${esc(active.id)}</strong><br>Amount: <strong>${money(active.amount)}</strong><br>Status: <span class="chip warn">payment_pending</span></p>
+              <div class="row" style="margin-top:8px">
+                <button class="btn primary" onclick="appConfirmPayment()">Confirm payment</button>
+                <button class="btn" onclick="appFailPayment()">Mark failed</button>
+              </div>
+            ` : '<p class="small">Select a flagged session to generate checkout payment.</p>'}
+          `, 5)}
+          ${panel(`
+            <h3>Payments must be verified</h3>
+            <div class="notice">State transition rule: <strong>flagged -> payment_pending -> completed</strong>. Direct completion is rejected.</div>
+          `, 12)}
+        </div>
+      `;
+    }
+
+    function reportsView() {
+      setStatus('ok', 'Remote-authoritative reporting snapshot');
+      return `
+        <div class="grid">
+          ${panel(`
+            <h3>Manager summary</h3>
+            <div class="row">
+              <span class="chip ok">Source: remote-authoritative</span>
+              <span class="chip">Cache fallback: available</span>
+              <span class="chip ${state.report.deadLetter ? 'danger' : 'ok'}">Dead-letter queue: ${state.report.deadLetter}</span>
+            </div>
+            <table class="table" style="margin-top:10px">
+              <tbody>
+                <tr><th>Revenue today</th><td>${money(state.report.revenueToday)}</td></tr>
+                <tr><th>Open sessions</th><td>${state.report.openSessions}</td></tr>
+                <tr><th>Checkout completion rate</th><td>${state.report.completionRate}%</td></tr>
+              </tbody>
+            </table>
+          `, 8)}
+          ${panel(`
+            <h3>Ops controls</h3>
+            <p class="small">You can simulate a sync incident and observe dead-letter visibility.</p>
+            <div class="row" style="margin-top:8px">
+              <button class="btn" onclick="appBumpDeadLetter()">Inject sync failure</button>
+              <button class="btn" onclick="appClearDeadLetter()">Resolve dead-letter</button>
+            </div>
+          `, 4)}
+          ${panel(`
+            <h3>Governance checks</h3>
+            <div class="row">
+              <span class="chip ok">Lot scope explicit</span>
+              <span class="chip ok">No silent defaults</span>
+              <span class="chip ok">Payment confirmation enforced</span>
+              <span class="chip ${state.report.deadLetter ? 'warn' : 'ok'}">Sync health monitored</span>
+            </div>
+          `, 12)}
+        </div>
+      `;
+    }
+
+    function renderStep() {
+      if (state.step === 0) return loginView();
+      if (state.step === 1) return dashboardView();
+      if (state.step === 2) return flagView();
+      if (state.step === 3) return paymentView();
+      return reportsView();
+    }
+
+    function render() {
+      scopeTag.textContent = `Lot context: ${state.lotId}`;
+      renderFlowList();
+      content.innerHTML = renderStep();
+      backBtn.disabled = state.step === 0;
+      nextBtn.disabled = state.step === steps.length - 1;
+      backBtn.style.opacity = backBtn.disabled ? 0.5 : 1;
+      nextBtn.style.opacity = nextBtn.disabled ? 0.5 : 1;
+    }
+
+    window.appLogin = function appLogin(role = 'employee') {
+      state.user = { id: 'EMP-17', role };
+      setStatus('ok', `Signed in as ${role}`);
+      state.step = 1;
+      render();
+    };
+
+    window.appCheckIn = function appCheckIn(plate, spot, size) {
+      const id = `SES-${Math.floor(Math.random() * 800 + 200)}`;
+      state.sessions.unshift({ id, plate, spot, size, started: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), status: 'open', amount: null });
+      setStatus('ok', `Checked in ${id}`);
+      render();
+    };
+
+    window.appFlag = function appFlag(id) {
+      const s = state.sessions.find(x => x.id === id);
+      if (!s || s.status !== 'open') return;
+      s.status = 'flagged';
+      setStatus('warn', `${id} flagged for checkout`);
+      render();
+    };
+
+    window.appStartCheckout = function appStartCheckout(id) {
+      const s = state.sessions.find(x => x.id === id);
+      if (!s || s.status !== 'flagged') return;
+      state.activeCheckout = { id: s.id, amount: calcAmount(s) };
+      s.amount = state.activeCheckout.amount;
+      setStatus('warn', `Payment pending for ${id}`);
+      render();
+    };
+
+    window.appConfirmPayment = function appConfirmPayment() {
+      if (!state.activeCheckout) return;
+      const s = state.sessions.find(x => x.id === state.activeCheckout.id);
+      if (!s) return;
+      s.status = 'completed';
+      state.report.revenueToday += Number(s.amount || 0);
+      state.report.openSessions = Math.max(0, state.report.openSessions - 1);
+      state.activeCheckout = null;
+      setStatus('ok', `${s.id} completed after payment confirmation`);
+      render();
+    };
+
+    window.appFailPayment = function appFailPayment() {
+      if (!state.activeCheckout) return;
+      const id = state.activeCheckout.id;
+      state.activeCheckout = null;
+      setStatus('danger', `Payment failed for ${id}`);
+      render();
+    };
+
+    window.appBumpDeadLetter = function appBumpDeadLetter() {
+      state.report.deadLetter += 1;
+      setStatus('warn', `Dead-letter count: ${state.report.deadLetter}`);
+      render();
+    };
+
+    window.appClearDeadLetter = function appClearDeadLetter() {
+      state.report.deadLetter = 0;
+      setStatus('ok', 'Dead-letter queue cleared');
+      render();
+    };
+
+    backBtn.onclick = () => { if (state.step > 0) { state.step -= 1; render(); } };
+    nextBtn.onclick = () => { if (state.step < steps.length - 1) { state.step += 1; render(); } };
+    resetBtn.onclick = () => {
+      state.step = 0;
+      state.user = null;
+      state.activeCheckout = null;
+      state.sessions = [
+        { id: 'SES-201', plate: 'KDA 430F', spot: 'A-12', size: 'SUV', started: '08:11', status: 'open', amount: null },
+        { id: 'SES-202', plate: 'KCY 977P', spot: 'A-03', size: 'Sedan', started: '08:34', status: 'open', amount: null },
+      ];
+      state.report = { revenueToday: 34200, openSessions: 17, completionRate: 96.2, deadLetter: 0 };
+      setStatus('ok', 'Flow reset');
+      render();
+    };
+
+    render();
+  </script>
+</body>
+</html>

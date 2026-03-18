@@ -9,7 +9,7 @@ abstract class User with _$User {
     required String id,
     required String name,
     required String email,
-    required String role,
+    required UserRole role,
     String? assignedLotId,
   }) = _User;
 
@@ -22,4 +22,13 @@ enum UserRole {
 
   bool get isManager => this == UserRole.manager;
   bool get isEmployee => this == UserRole.employee;
+
+  String get label {
+    switch (this) {
+      case UserRole.employee:
+        return 'Employee';
+      case UserRole.manager:
+        return 'Manager';
+    }
+  }
 }

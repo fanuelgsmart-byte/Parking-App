@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:parkflow_manager/features/auth/domain/entities/user.dart';
 
 part 'employee.freezed.dart';
 part 'employee.g.dart';
@@ -9,7 +10,7 @@ abstract class Employee with _$Employee {
     required String id,
     required String name,
     required String email,
-    required String role,
+    required UserRole role,
     String? assignedLotId,
     required bool isActive,
     required DateTime createdAt,

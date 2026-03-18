@@ -3,6 +3,7 @@ import 'package:parkflow_manager/core/error/exceptions.dart';
 import 'package:parkflow_manager/core/error/failures.dart';
 import 'package:parkflow_manager/core/network/network_info.dart';
 import 'package:parkflow_manager/core/utils/either.dart';
+import 'package:parkflow_manager/features/auth/domain/entities/user.dart';
 import 'package:parkflow_manager/features/employee_management/data/datasources/employee_local_datasource.dart';
 import 'package:parkflow_manager/features/employee_management/data/datasources/employee_remote_datasource.dart';
 import 'package:parkflow_manager/features/employee_management/domain/entities/employee.dart';
@@ -11,13 +12,13 @@ import 'package:parkflow_manager/features/parking_session/data/datasources/sessi
 
 @Injectable(as: EmployeeRepository)
 class EmployeeRepositoryImpl implements EmployeeRepository {
-
   EmployeeRepositoryImpl({
     required this.localDataSource,
     required this.remoteDataSource,
     required this.sessionLocalDataSource,
     required this.networkInfo,
   });
+
   final EmployeeLocalDataSource localDataSource;
   final EmployeeRemoteDataSource remoteDataSource;
   final SessionLocalDataSource sessionLocalDataSource;
@@ -35,12 +36,9 @@ class EmployeeRepositoryImpl implements EmployeeRepository {
       }
     }
 
-    // Fallback to local
     try {
       final localEmployees = await localDataSource.getEmployees(lotId);
-      return Right(
-        localEmployees.map(_mapDataToEntity).toList(),
-      );
+      return Right(localEmployees.map(_mapDataToEntity).toList());
     } catch (e) {
       return Left(CacheFailure(message: 'Failed to get employees: $e'));
     }
@@ -132,7 +130,6 @@ class EmployeeRepositoryImpl implements EmployeeRepository {
       const digitalCollected = 0.0;
 
       for (final session in employeeSessions) {
-        // Simplified — in production fetch from payments table
         cashCollected += session.totalFee ?? 0;
       }
 
@@ -156,7 +153,10 @@ class EmployeeRepositoryImpl implements EmployeeRepository {
       id: data.remoteId as String,
       name: data.name as String,
       email: data.email as String,
-      role: data.role as String,
+      role: UserRole.values.firstWhere(
+        (role) => role.name == (data.role as String),
+        orElse: () => UserRole.employee,
+      ),
       assignedLotId: data.assignedLotId as String?,
       isActive: data.isActive as bool,
       createdAt: data.createdAt as DateTime,

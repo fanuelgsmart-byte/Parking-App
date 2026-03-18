@@ -14,8 +14,8 @@ abstract class EmployeeLocalDataSource {
 
 @Injectable(as: EmployeeLocalDataSource)
 class EmployeeLocalDataSourceImpl implements EmployeeLocalDataSource {
-
   EmployeeLocalDataSourceImpl({required this.database});
+
   final AppDatabase database;
 
   @override
@@ -23,8 +23,7 @@ class EmployeeLocalDataSourceImpl implements EmployeeLocalDataSource {
     return (database.select(database.employees)
           ..where(
             (tbl) =>
-                tbl.assignedLotId.equals(lotId) &
-                tbl.isActive.equals(true),
+                tbl.assignedLotId.equals(lotId) & tbl.isActive.equals(true),
           ))
         .get();
   }
@@ -43,7 +42,9 @@ class EmployeeLocalDataSourceImpl implements EmployeeLocalDataSource {
 
   @override
   Future<void> updateEmployee(
-      String remoteId, EmployeesCompanion companion) async {
+    String remoteId,
+    EmployeesCompanion companion,
+  ) async {
     await (database.update(database.employees)
           ..where((tbl) => tbl.remoteId.equals(remoteId)))
         .write(companion);
@@ -64,7 +65,7 @@ class EmployeeLocalDataSourceImpl implements EmployeeLocalDataSource {
         remoteId: Value(employee.id),
         name: Value(employee.name),
         email: Value(employee.email),
-        role: Value(employee.role),
+        role: Value(employee.role.name),
         assignedLotId: Value(employee.assignedLotId),
         isActive: Value(employee.isActive),
       );

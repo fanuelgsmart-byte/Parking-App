@@ -6,8 +6,21 @@ import 'package:parkflow_manager/core/widgets/loading_indicator.dart';
 import 'package:parkflow_manager/features/lot_map/domain/entities/parking_spot.dart';
 import 'package:parkflow_manager/features/lot_map/presentation/bloc/lot_map_cubit.dart';
 
-class LotMapPage extends StatelessWidget {
-  const LotMapPage({super.key});
+class LotMapPage extends StatefulWidget {
+  const LotMapPage({super.key, required this.lotId});
+
+  final String lotId;
+
+  @override
+  State<LotMapPage> createState() => _LotMapPageState();
+}
+
+class _LotMapPageState extends State<LotMapPage> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<LotMapCubit>().loadSpots(widget.lotId);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -479,3 +492,4 @@ class _DetailRow extends StatelessWidget {
     );
   }
 }
+

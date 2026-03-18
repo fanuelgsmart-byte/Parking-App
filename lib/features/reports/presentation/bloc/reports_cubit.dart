@@ -1,11 +1,10 @@
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:parkflow_manager/features/reports/domain/entities/occupancy_report.dart';
+import 'package:parkflow_manager/features/reports/domain/entities/report_payload.dart';
 import 'package:parkflow_manager/features/reports/domain/entities/revenue_report.dart';
 import 'package:parkflow_manager/features/reports/domain/repositories/report_repository.dart';
-
-// ──────────────────────────── State ────────────────────────────
 
 abstract class ReportsState extends Equatable {
   const ReportsState();
@@ -23,48 +22,54 @@ class ReportsLoading extends ReportsState {
 }
 
 class RevenueReportLoaded extends ReportsState {
+  const RevenueReportLoaded({required this.payload});
 
-  const RevenueReportLoaded({required this.report});
-  final RevenueReport report;
+  final ReportPayload<RevenueReport> payload;
+
+  RevenueReport get report => payload.data;
+  bool get isStale => payload.isStale;
 
   @override
-  List<Object?> get props => [report];
+  List<Object?> get props => [payload];
 }
 
 class OccupancyReportLoaded extends ReportsState {
+  const OccupancyReportLoaded({required this.payload});
 
-  const OccupancyReportLoaded({required this.report});
-  final OccupancyReport report;
+  final ReportPayload<OccupancyReport> payload;
+
+  OccupancyReport get report => payload.data;
+  bool get isStale => payload.isStale;
 
   @override
-  List<Object?> get props => [report];
+  List<Object?> get props => [payload];
 }
 
 class EmployeePerformanceLoaded extends ReportsState {
+  const EmployeePerformanceLoaded({required this.payload});
 
-  const EmployeePerformanceLoaded({required this.data});
-  final List<Map<String, dynamic>> data;
+  final ReportPayload<List<Map<String, dynamic>>> payload;
+
+  List<Map<String, dynamic>> get data => payload.data;
+  bool get isStale => payload.isStale;
 
   @override
-  List<Object?> get props => [data];
+  List<Object?> get props => [payload];
 }
 
 class ReportsError extends ReportsState {
-
   const ReportsError({required this.message});
+
   final String message;
 
   @override
   List<Object?> get props => [message];
 }
 
-// ──────────────────────────── Cubit ────────────────────────────
-
 @injectable
 class ReportsCubit extends Cubit<ReportsState> {
+  ReportsCubit({required this.reportRepository}) : super(const ReportsInitial());
 
-  ReportsCubit({required this.reportRepository})
-      : super(const ReportsInitial());
   final ReportRepository reportRepository;
 
   Future<void> loadRevenueReport({
@@ -80,7 +85,7 @@ class ReportsCubit extends Cubit<ReportsState> {
     );
     result.fold(
       (failure) => emit(ReportsError(message: failure.message)),
-      (report) => emit(RevenueReportLoaded(report: report)),
+      (payload) => emit(RevenueReportLoaded(payload: payload)),
     );
   }
 
@@ -97,7 +102,7 @@ class ReportsCubit extends Cubit<ReportsState> {
     );
     result.fold(
       (failure) => emit(ReportsError(message: failure.message)),
-      (report) => emit(OccupancyReportLoaded(report: report)),
+      (payload) => emit(OccupancyReportLoaded(payload: payload)),
     );
   }
 
@@ -114,7 +119,7 @@ class ReportsCubit extends Cubit<ReportsState> {
     );
     result.fold(
       (failure) => emit(ReportsError(message: failure.message)),
-      (data) => emit(EmployeePerformanceLoaded(data: data)),
+      (payload) => emit(EmployeePerformanceLoaded(payload: payload)),
     );
   }
 }

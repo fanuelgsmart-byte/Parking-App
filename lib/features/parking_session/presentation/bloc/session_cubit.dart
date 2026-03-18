@@ -1,13 +1,15 @@
-import 'dart:async';
+﻿import 'dart:async';
 
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
+import 'package:parkflow_manager/core/error/failures.dart';
+import 'package:parkflow_manager/core/session/app_session_context.dart';
+import 'package:parkflow_manager/core/utils/either.dart';
 import 'package:parkflow_manager/features/parking_session/domain/entities/parking_session.dart';
+import 'package:parkflow_manager/features/parking_session/domain/entities/vehicle.dart';
 import 'package:parkflow_manager/features/parking_session/domain/repositories/parking_session_repository.dart';
 import 'package:parkflow_manager/features/parking_session/domain/usecases/get_active_sessions.dart';
-
-// ──────────────────────────── State ────────────────────────────
 
 abstract class SessionState extends Equatable {
   const SessionState();
@@ -25,8 +27,8 @@ class SessionLoading extends SessionState {
 }
 
 class SessionLoaded extends SessionState {
-
   const SessionLoaded({required this.sessions});
+
   final List<ParkingSession> sessions;
 
   @override
@@ -34,8 +36,8 @@ class SessionLoaded extends SessionState {
 }
 
 class SessionCreated extends SessionState {
-
   const SessionCreated({required this.session});
+
   final ParkingSession session;
 
   @override
@@ -43,80 +45,113 @@ class SessionCreated extends SessionState {
 }
 
 class SessionError extends SessionState {
-
   const SessionError({required this.message});
+
   final String message;
 
   @override
   List<Object?> get props => [message];
 }
 
-// ──────────────────────────── Cubit ────────────────────────────
+class CheckInRequest extends Equatable {
+  const CheckInRequest({
+    required this.licensePlate,
+    required this.vehicleSize,
+    required this.vehicleColor,
+    required this.lotId,
+    required this.employeeId,
+  });
+
+  final String licensePlate;
+  final VehicleSize vehicleSize;
+  final String vehicleColor;
+  final LotId lotId;
+  final EmployeeId employeeId;
+
+  @override
+  List<Object?> get props => [
+        licensePlate,
+        vehicleSize,
+        vehicleColor,
+        lotId,
+        employeeId,
+      ];
+}
 
 @injectable
 class SessionCubit extends Cubit<SessionState> {
-
   SessionCubit({
-    required this.getActiveSessions,
+    required this.getOpenSessions,
     required this.repository,
   }) : super(const SessionInitial());
-  final GetActiveSessions getActiveSessions;
+
+  final GetOpenSessions getOpenSessions;
   final ParkingSessionRepository repository;
 
   StreamSubscription<List<ParkingSession>>? _watchSub;
-  String? _currentLotId;
+  LotId? _currentLotId;
 
-  Future<void> loadActiveSessions(String lotId) async {
+  Future<void> loadOpenSessions(LotId lotId) async {
     _currentLotId = lotId;
     emit(const SessionLoading());
-    final result = await getActiveSessions(lotId);
+    final result = await getOpenSessions(lotId);
     result.fold(
       (failure) => emit(SessionError(message: failure.message)),
       (sessions) => emit(SessionLoaded(sessions: sessions)),
     );
   }
 
-  /// Subscribe to real-time spot/session updates via Drift streams.
-  void watchSessions(String lotId) {
+  void watchSessions(LotId lotId) {
     _currentLotId = lotId;
     _watchSub?.cancel();
-    _watchSub = repository.watchActiveSessions(lotId).listen(
+    _watchSub = repository.watchOpenSessions(lotId).listen(
       (sessions) => emit(SessionLoaded(sessions: sessions)),
-      onError: (e) => emit(SessionError(message: e.toString())),
+      onError: (Object error) => emit(SessionError(message: error.toString())),
     );
   }
 
-  Future<void> createSession({
-    required String licensePlate,
-    required String vehicleSize,
-    required String vehicleColor,
-    required int spotId,
-    required String lotId,
-    required String employeeId,
-  }) async {
+  Future<void> createSession(CheckInRequest request) async {
     emit(const SessionLoading());
     final result = await repository.createSession(
-      licensePlate: licensePlate,
-      vehicleSize: vehicleSize,
-      vehicleColor: vehicleColor,
-      spotId: spotId,
-      lotId: lotId,
-      employeeId: employeeId,
+      licensePlate: request.licensePlate,
+      vehicleSize: request.vehicleSize,
+      vehicleColor: request.vehicleColor,
+      lotId: request.lotId,
+      employeeId: request.employeeId,
     );
 
     result.fold(
       (failure) => emit(SessionError(message: failure.message)),
-      (session) {
+      (session) async {
         emit(SessionCreated(session: session));
-        // Reload the full list
-        if (_currentLotId != null) loadActiveSessions(_currentLotId!);
+        if (_currentLotId != null) {
+          await loadOpenSessions(_currentLotId!);
+        }
       },
     );
   }
 
-  Future<void> flagForCheckout(int sessionId) async {
-    await repository.flagForCheckout(sessionId);
-    if (_currentLotId != null) await loadActiveSessions(_currentLotId!);
+  Future<void> flagForCheckout(SessionId sessionId) async {
+    final result = await repository.flagForCheckout(sessionId);
+    await _handleMutationResult(result);
+  }
+
+  Future<void> markPaymentPending(SessionId sessionId) async {
+    final result = await repository.markPaymentPending(sessionId);
+    await _handleMutationResult(result);
+  }
+
+  Future<void> _handleMutationResult(
+    Either<Failure, ParkingSession> result,
+  ) async {
+    result.fold(
+      (failure) => emit(SessionError(message: failure.message)),
+      (_) async {
+        if (_currentLotId != null) {
+          await loadOpenSessions(_currentLotId!);
+        }
+      },
+    );
   }
 
   @override

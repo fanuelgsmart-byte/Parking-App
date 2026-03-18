@@ -5,20 +5,19 @@ import 'package:parkflow_manager/core/network/api_client.dart';
 import 'package:parkflow_manager/features/parking_session/data/models/parking_session_model.dart';
 
 abstract class SessionRemoteDataSource {
-  Future<List<ParkingSessionModel>> getActiveSessions(String lotId);
+  Future<List<ParkingSessionModel>> getOpenSessions(String lotId);
   Future<ParkingSessionModel> createSession(Map<String, dynamic> data);
-  Future<ParkingSessionModel> updateSession(
-      int id, Map<String, dynamic> data);
+  Future<ParkingSessionModel> updateSession(int id, Map<String, dynamic> data);
 }
 
 @Injectable(as: SessionRemoteDataSource)
 class SessionRemoteDataSourceImpl implements SessionRemoteDataSource {
-
   SessionRemoteDataSourceImpl({required this.apiClient});
+
   final ApiClient apiClient;
 
   @override
-  Future<List<ParkingSessionModel>> getActiveSessions(String lotId) async {
+  Future<List<ParkingSessionModel>> getOpenSessions(String lotId) async {
     try {
       final response = await apiClient.get(
         ApiConstants.activeSessions,
@@ -26,8 +25,7 @@ class SessionRemoteDataSourceImpl implements SessionRemoteDataSource {
       );
       final list = response.data['sessions'] as List;
       return list
-          .map((e) =>
-              ParkingSessionModel.fromJson(e as Map<String, dynamic>))
+          .map((e) => ParkingSessionModel.fromJson(e as Map<String, dynamic>))
           .toList();
     } on ServerException {
       rethrow;
@@ -37,13 +35,9 @@ class SessionRemoteDataSourceImpl implements SessionRemoteDataSource {
   }
 
   @override
-  Future<ParkingSessionModel> createSession(
-      Map<String, dynamic> data) async {
+  Future<ParkingSessionModel> createSession(Map<String, dynamic> data) async {
     try {
-      final response = await apiClient.post(
-        ApiConstants.sessions,
-        data: data,
-      );
+      final response = await apiClient.post(ApiConstants.sessions, data: data);
       return ParkingSessionModel.fromJson(
         response.data as Map<String, dynamic>,
       );
@@ -55,8 +49,7 @@ class SessionRemoteDataSourceImpl implements SessionRemoteDataSource {
   }
 
   @override
-  Future<ParkingSessionModel> updateSession(
-      int id, Map<String, dynamic> data) async {
+  Future<ParkingSessionModel> updateSession(int id, Map<String, dynamic> data) async {
     try {
       final response = await apiClient.put(
         '${ApiConstants.sessions}/$id',

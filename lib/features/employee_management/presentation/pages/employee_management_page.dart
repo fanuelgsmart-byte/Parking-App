@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:parkflow_manager/features/auth/domain/entities/user.dart';
 import 'package:parkflow_manager/core/theme/app_theme.dart';
 import 'package:parkflow_manager/core/utils/validators.dart';
 import 'package:parkflow_manager/core/widgets/loading_indicator.dart';
@@ -234,7 +235,7 @@ class _EmployeeCard extends StatelessWidget {
   final void Function(String id) onViewShift;
 
   Color get _roleColor =>
-      employee.role == 'manager' ? AppTheme.warningColor : AppTheme.primary;
+      employee.role == UserRole.manager ? AppTheme.warningColor : AppTheme.primary;
 
   @override
   Widget build(BuildContext context) {
@@ -294,8 +295,7 @@ class _EmployeeCard extends StatelessWidget {
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
-                        employee.role[0].toUpperCase() +
-                            employee.role.substring(1),
+                        employee.role.label,
                         style: TextStyle(
                           color: _roleColor,
                           fontWeight: FontWeight.w600,
@@ -522,7 +522,7 @@ class _AddEmployeeSheetState extends State<_AddEmployeeSheet> {
         id: '',
         name: _nameCtrl.text.trim(),
         email: _emailCtrl.text.trim(),
-        role: _selectedRole,
+        role: _selectedRole == 'manager' ? UserRole.manager : UserRole.employee,
         assignedLotId: widget.lotId,
         isActive: true,
         createdAt: DateTime.now(),
@@ -735,3 +735,5 @@ class _Sheet extends StatelessWidget {
     );
   }
 }
+
+

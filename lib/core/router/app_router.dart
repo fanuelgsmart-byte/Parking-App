@@ -1,23 +1,30 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
+import 'package:parkflow_manager/features/auth/domain/entities/user.dart';
 import 'package:parkflow_manager/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:parkflow_manager/features/auth/presentation/bloc/auth_state.dart';
 import 'package:parkflow_manager/features/auth/presentation/pages/login_page.dart';
 import 'package:parkflow_manager/features/employee_management/presentation/pages/employee_management_page.dart';
+import 'package:parkflow_manager/features/lot_map/presentation/pages/lot_map_page.dart';
 import 'package:parkflow_manager/features/parking_session/presentation/pages/employee_dashboard_page.dart';
+import 'package:parkflow_manager/features/payment/presentation/bloc/checkout_bloc.dart';
+import 'package:parkflow_manager/features/payment/presentation/pages/checkout_page.dart';
+import 'package:parkflow_manager/features/reports/presentation/bloc/rate_config_cubit.dart';
 import 'package:parkflow_manager/features/reports/presentation/pages/manager_dashboard_page.dart';
 import 'package:parkflow_manager/features/reports/presentation/pages/rate_config_page.dart';
-import 'package:parkflow_manager/features/lot_map/presentation/pages/lot_map_page.dart';
-import 'package:parkflow_manager/features/payment/presentation/pages/checkout_page.dart';
 
 class AppRouter {
+  AppRouter({required this.authBloc, GetIt? serviceLocator})
+      : _serviceLocator = serviceLocator ?? GetIt.instance;
 
-  AppRouter({required this.authBloc});
   final AuthBloc authBloc;
+  final GetIt _serviceLocator;
 
   late final GoRouter router = GoRouter(
     initialLocation: '/login',
-    debugLogDiagnostics: false, // Disabled — prevents route info leaking in logs
+    debugLogDiagnostics: false,
     redirect: _guard,
     routes: [
       GoRoute(
@@ -25,8 +32,6 @@ class AppRouter {
         name: 'login',
         builder: (context, state) => const LoginPage(),
       ),
-
-      // ──────────── Employee Routes ────────────
       GoRoute(
         path: '/employee',
         name: 'employee-dashboard',
@@ -35,7 +40,14 @@ class AppRouter {
           GoRoute(
             path: 'lot-map',
             name: 'lot-map',
-            builder: (context, state) => const LotMapPage(),
+            builder: (context, state) {
+              final authState = authBloc.state;
+              if (authState is! AuthAuthenticated ||
+                  !authState.context.hasLotAccess) {
+                return const _MissingLotScopePage();
+              }
+              return LotMapPage(lotId: authState.context.requireLotId());
+            },
           ),
           GoRoute(
             path: 'checkout/:sessionId',
@@ -44,18 +56,18 @@ class AppRouter {
               final raw = state.pathParameters['sessionId'];
               final sessionId = int.tryParse(raw ?? '');
               if (sessionId == null) {
-                // Guard against tampered/malformed route params
                 return const Scaffold(
                   body: Center(child: Text('Invalid session')),
                 );
               }
-              return CheckoutPage(sessionId: sessionId);
+              return BlocProvider(
+                create: (_) => _serviceLocator<CheckoutBloc>(),
+                child: CheckoutPage(sessionId: sessionId),
+              );
             },
           ),
         ],
       ),
-
-      // ──────────── Manager Routes ────────────
       GoRoute(
         path: '/manager',
         name: 'manager-dashboard',
@@ -66,10 +78,13 @@ class AppRouter {
             name: 'employee-management',
             builder: (context, state) {
               final authState = authBloc.state;
-              final lotId = authState is AuthAuthenticated
-                  ? (authState.user.assignedLotId ?? 'default')
-                  : 'default';
-              return EmployeeManagementPage(lotId: lotId);
+              if (authState is! AuthAuthenticated ||
+                  !authState.context.hasLotAccess) {
+                return const _MissingLotScopePage();
+              }
+              return EmployeeManagementPage(
+                lotId: authState.context.requireLotId(),
+              );
             },
           ),
           GoRoute(
@@ -77,10 +92,15 @@ class AppRouter {
             name: 'rate-config',
             builder: (context, state) {
               final authState = authBloc.state;
-              final lotId = authState is AuthAuthenticated
-                  ? (authState.user.assignedLotId ?? 'default')
-                  : 'default';
-              return RateConfigPage(lotId: lotId);
+              if (authState is! AuthAuthenticated ||
+                  !authState.context.hasLotAccess) {
+                return const _MissingLotScopePage();
+              }
+              final lotId = authState.context.requireLotId();
+              return BlocProvider(
+                create: (_) => _serviceLocator<RateConfigCubit>()..loadRates(lotId),
+                child: RateConfigPage(lotId: lotId),
+              );
             },
           ),
         ],
@@ -93,28 +113,43 @@ class AppRouter {
     final location = state.matchedLocation;
     final isOnLogin = location == '/login';
 
-    // Unauthenticated users can only access /login
     if (authState is AuthUnauthenticated && !isOnLogin) {
       return '/login';
     }
 
-    // Authenticated users on /login get redirected to their dashboard
     if (authState is AuthAuthenticated && isOnLogin) {
-      return authState.user.role == 'manager' ? '/manager' : '/employee';
+      return authState.user.role == UserRole.manager ? '/manager' : '/employee';
     }
 
-    // Enforce role-based route access
     if (authState is AuthAuthenticated) {
       final role = authState.user.role;
-      if (role == 'employee' && location.startsWith('/manager')) {
-        return '/employee'; // Employees cannot access manager routes
+      if (role == UserRole.employee && location.startsWith('/manager')) {
+        return '/employee';
       }
-      if (role == 'manager' && location.startsWith('/employee')) {
-        // Managers CAN access employee routes (they may need to demo/inspect)
+      if (role == UserRole.manager && location.startsWith('/employee')) {
         return null;
       }
     }
 
     return null;
+  }
+}
+
+class _MissingLotScopePage extends StatelessWidget {
+  const _MissingLotScopePage();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(
+      body: Center(
+        child: Padding(
+          padding: EdgeInsets.all(24),
+          child: Text(
+            'This account has no assigned parking lot. Please contact a manager.',
+            textAlign: TextAlign.center,
+          ),
+        ),
+      ),
+    );
   }
 }

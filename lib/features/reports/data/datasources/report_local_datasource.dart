@@ -19,12 +19,15 @@ abstract class ReportLocalDataSource {
     DateTime start,
     DateTime end,
   );
+
+  Future<void> cacheReport(String cacheKey, String payload);
+  Future<ReportCacheData?> getCachedReport(String cacheKey);
 }
 
 @Injectable(as: ReportLocalDataSource)
 class ReportLocalDataSourceImpl implements ReportLocalDataSource {
-
   ReportLocalDataSourceImpl({required this.database});
+
   final AppDatabase database;
 
   @override
@@ -77,9 +80,32 @@ class ReportLocalDataSourceImpl implements ReportLocalDataSource {
 
     final counts = <String, int>{};
     for (final session in sessions) {
-      counts[session.employeeId] =
-          (counts[session.employeeId] ?? 0) + 1;
+      counts[session.employeeId] = (counts[session.employeeId] ?? 0) + 1;
     }
     return counts;
+  }
+
+  @override
+  Future<void> cacheReport(String cacheKey, String payload) async {
+    final existing = await getCachedReport(cacheKey);
+    final companion = ReportCachesCompanion(
+      cacheKey: Value(cacheKey),
+      payload: Value(payload),
+      cachedAt: Value(DateTime.now()),
+    );
+    if (existing == null) {
+      await database.into(database.reportCaches).insert(companion);
+    } else {
+      await (database.update(database.reportCaches)
+            ..where((tbl) => tbl.cacheKey.equals(cacheKey)))
+          .write(companion);
+    }
+  }
+
+  @override
+  Future<ReportCacheData?> getCachedReport(String cacheKey) {
+    return (database.select(database.reportCaches)
+          ..where((tbl) => tbl.cacheKey.equals(cacheKey)))
+        .getSingleOrNull();
   }
 }

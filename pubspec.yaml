@@ -1,4 +1,4 @@
-name: parkflow_manager
+﻿name: parkflow_manager
 description: ParkFlow Manager - Parking Lot Management System
 publish_to: 'none'
 version: 1.0.0+1
@@ -34,7 +34,7 @@ dependencies:
 
   # Data Models
   freezed_annotation: ^3.0.0
-  json_annotation: ^4.9.0
+  json_annotation: ^4.11.0
 
   # Security
   flutter_secure_storage: ^9.2.4
@@ -94,3 +94,4 @@ flutter:
   assets:
     - assets/images/
     - assets/fonts/
+

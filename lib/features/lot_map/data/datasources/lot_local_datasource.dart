@@ -6,12 +6,13 @@ abstract class LotLocalDataSource {
   Future<List<ParkingSpotData>> getSpots(String lotId);
   Stream<List<ParkingSpotData>> watchSpots(String lotId);
   Future<bool> updateSpotStatus(int spotId, String status);
+  Future<ParkingSpotData> getSpotById(int spotId);
 }
 
 @Injectable(as: LotLocalDataSource)
 class LotLocalDataSourceImpl implements LotLocalDataSource {
-
   LotLocalDataSourceImpl({required this.database});
+
   final AppDatabase database;
 
   @override
@@ -34,5 +35,12 @@ class LotLocalDataSourceImpl implements LotLocalDataSource {
           ..where((tbl) => tbl.id.equals(spotId)))
         .write(ParkingSpotsCompanion(status: Value(status)))
         .then((rows) => rows > 0);
+  }
+
+  @override
+  Future<ParkingSpotData> getSpotById(int spotId) {
+    return (database.select(database.parkingSpots)
+          ..where((tbl) => tbl.id.equals(spotId)))
+        .getSingle();
   }
 }

@@ -2,15 +2,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:parkflow_manager/core/security/login_throttle.dart';
 import 'package:parkflow_manager/core/utils/usecase.dart';
+import 'package:parkflow_manager/features/auth/domain/repositories/auth_repository.dart';
 import 'package:parkflow_manager/features/auth/domain/usecases/login_usecase.dart';
 import 'package:parkflow_manager/features/auth/domain/usecases/logout_usecase.dart';
-import 'package:parkflow_manager/features/auth/domain/repositories/auth_repository.dart';
 import 'package:parkflow_manager/features/auth/presentation/bloc/auth_event.dart';
 import 'package:parkflow_manager/features/auth/presentation/bloc/auth_state.dart';
 
 @injectable
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
-
   AuthBloc({
     required this.loginUseCase,
     required this.logoutUseCase,
@@ -20,6 +19,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthLoginRequested>(_onLoginRequested);
     on<AuthLogoutRequested>(_onLogoutRequested);
   }
+
   final LoginUseCase loginUseCase;
   final LogoutUseCase logoutUseCase;
   final AuthRepository authRepository;
@@ -33,7 +33,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     final result = await authRepository.getCurrentUser();
     result.fold(
       (failure) => emit(const AuthUnauthenticated()),
-      (user) => emit(AuthAuthenticated(user: user)),
+      (session) => emit(AuthAuthenticated(session: session)),
     );
   }
 
@@ -41,12 +41,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     AuthLoginRequested event,
     Emitter<AuthState> emit,
   ) async {
-    // Check if the user is currently throttled
     if (_throttle.isLocked) {
       final remaining = _throttle.remainingLockout;
-      emit(AuthError(
-        message: 'Too many failed attempts. Try again in ${remaining.inSeconds}s.',
-      ));
+      emit(
+        AuthError(
+          message:
+              'Too many failed attempts. Try again in ${remaining.inSeconds}s.',
+        ),
+      );
       return;
     }
 
@@ -60,20 +62,24 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       (failure) {
         final lockDuration = _throttle.recordFailure();
         if (lockDuration > Duration.zero) {
-          emit(AuthError(
-            message:
-                'Login failed. Account locked for ${lockDuration.inSeconds}s.',
-          ));
+          emit(
+            AuthError(
+              message:
+                  'Login failed. Account locked for ${lockDuration.inSeconds}s.',
+            ),
+          );
         } else {
           final remaining = _throttle.maxAttempts - _throttle.failedAttempts;
-          emit(AuthError(
-            message: '${failure.message} ($remaining attempts remaining)',
-          ));
+          emit(
+            AuthError(
+              message: '${failure.message} ($remaining attempts remaining)',
+            ),
+          );
         }
       },
-      (user) {
+      (session) {
         _throttle.reset();
-        emit(AuthAuthenticated(user: user));
+        emit(AuthAuthenticated(session: session));
       },
     );
   }

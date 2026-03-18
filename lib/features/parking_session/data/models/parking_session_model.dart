@@ -2,7 +2,6 @@ import 'package:parkflow_manager/features/parking_session/data/models/vehicle_mo
 import 'package:parkflow_manager/features/parking_session/domain/entities/parking_session.dart';
 
 class ParkingSessionModel {
-
   const ParkingSessionModel({
     required this.id,
     required this.vehicle,
@@ -36,6 +35,7 @@ class ParkingSessionModel {
       isSynced: json['is_synced'] as bool? ?? true,
     );
   }
+
   final int id;
   final VehicleModel vehicle;
   final int spotId;
@@ -74,18 +74,20 @@ class ParkingSessionModel {
       entryTime: entryTime,
       exitTime: exitTime,
       totalFee: totalFee,
-      status: _parseStatus(status),
+      status: parseStatus(status),
       employeeId: employeeId,
       isSynced: isSynced,
     );
   }
 
-  static SessionStatus _parseStatus(String status) {
+  static SessionStatus parseStatus(String status) {
     switch (status) {
       case 'active':
         return SessionStatus.active;
       case 'flagged_for_checkout':
         return SessionStatus.flaggedForCheckout;
+      case 'payment_pending':
+        return SessionStatus.paymentPending;
       case 'completed':
         return SessionStatus.completed;
       default:
@@ -99,6 +101,8 @@ class ParkingSessionModel {
         return 'active';
       case SessionStatus.flaggedForCheckout:
         return 'flagged_for_checkout';
+      case SessionStatus.paymentPending:
+        return 'payment_pending';
       case SessionStatus.completed:
         return 'completed';
     }

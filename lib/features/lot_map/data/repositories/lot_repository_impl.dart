@@ -1,4 +1,4 @@
-import 'package:injectable/injectable.dart';
+﻿import 'package:injectable/injectable.dart';
 import 'package:parkflow_manager/core/database/app_database.dart';
 import 'package:parkflow_manager/core/error/exceptions.dart';
 import 'package:parkflow_manager/core/error/failures.dart';
@@ -13,12 +13,12 @@ import 'package:parkflow_manager/features/lot_map/domain/repositories/lot_reposi
 
 @Injectable(as: LotRepository)
 class LotRepositoryImpl implements LotRepository {
-
   LotRepositoryImpl({
     required this.localDataSource,
     required this.remoteDataSource,
     required this.networkInfo,
   });
+
   final LotLocalDataSource localDataSource;
   final LotRemoteDataSource remoteDataSource;
   final NetworkInfo networkInfo;
@@ -52,9 +52,7 @@ class LotRepositoryImpl implements LotRepository {
   Future<Either<Failure, List<ParkingSpot>>> getSpots(String lotId) async {
     try {
       final localSpots = await localDataSource.getSpots(lotId);
-      return Right(
-        localSpots.map(_mapSpotDataToEntity).toList(),
-      );
+      return Right(localSpots.map(_mapSpotDataToEntity).toList());
     } catch (e) {
       return Left(CacheFailure(message: 'Failed to get spots: $e'));
     }
@@ -73,10 +71,8 @@ class LotRepositoryImpl implements LotRepository {
     SpotStatus status,
   ) async {
     try {
-      final statusStr = status.name;
-      await localDataSource.updateSpotStatus(spotId, statusStr);
-      final spots = await localDataSource.getSpots('');
-      final spot = spots.firstWhere((s) => s.id == spotId);
+      await localDataSource.updateSpotStatus(spotId, status.name);
+      final spot = await localDataSource.getSpotById(spotId);
       return Right(_mapSpotDataToEntity(spot));
     } catch (e) {
       return Left(CacheFailure(message: 'Failed to update spot: $e'));
@@ -95,3 +91,4 @@ class LotRepositoryImpl implements LotRepository {
     ).toEntity();
   }
 }
+

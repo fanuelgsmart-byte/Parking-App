@@ -27,6 +27,7 @@ abstract class ParkingSession with _$ParkingSession {
 enum SessionStatus {
   active,
   flaggedForCheckout,
+  paymentPending,
   completed;
 
   String get displayName {
@@ -35,8 +36,27 @@ enum SessionStatus {
         return 'Active';
       case SessionStatus.flaggedForCheckout:
         return 'Ready for Checkout';
+      case SessionStatus.paymentPending:
+        return 'Payment Pending';
       case SessionStatus.completed:
         return 'Completed';
+    }
+  }
+
+  bool get isOpen => this != SessionStatus.completed;
+
+  bool canTransitionTo(SessionStatus next) {
+    switch (this) {
+      case SessionStatus.active:
+        return next == SessionStatus.flaggedForCheckout;
+      case SessionStatus.flaggedForCheckout:
+        return next == SessionStatus.paymentPending ||
+            next == SessionStatus.completed;
+      case SessionStatus.paymentPending:
+        return next == SessionStatus.completed ||
+            next == SessionStatus.flaggedForCheckout;
+      case SessionStatus.completed:
+        return false;
     }
   }
 }

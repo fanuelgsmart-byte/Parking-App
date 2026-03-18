@@ -1,7 +1,6 @@
 import 'package:parkflow_manager/features/payment/domain/entities/payment.dart';
 
 class PaymentModel {
-
   const PaymentModel({
     required this.id,
     required this.sessionId,
@@ -27,6 +26,7 @@ class PaymentModel {
       isSynced: json['is_synced'] as bool? ?? true,
     );
   }
+
   final int id;
   final int sessionId;
   final double amount;
@@ -55,14 +55,14 @@ class PaymentModel {
       sessionId: sessionId,
       amount: amount,
       method: method == 'cash' ? PaymentMethod.cash : PaymentMethod.digital,
-      status: _parseStatus(status),
+      status: parseStatus(status),
       transactionRef: transactionRef,
       paidAt: paidAt,
       isSynced: isSynced,
     );
   }
 
-  static PaymentStatus _parseStatus(String status) {
+  static PaymentStatus parseStatus(String status) {
     switch (status) {
       case 'completed':
         return PaymentStatus.completed;
@@ -70,6 +70,17 @@ class PaymentModel {
         return PaymentStatus.failed;
       default:
         return PaymentStatus.pending;
+    }
+  }
+
+  static String statusToString(PaymentStatus status) {
+    switch (status) {
+      case PaymentStatus.pending:
+        return 'pending';
+      case PaymentStatus.completed:
+        return 'completed';
+      case PaymentStatus.failed:
+        return 'failed';
     }
   }
 }

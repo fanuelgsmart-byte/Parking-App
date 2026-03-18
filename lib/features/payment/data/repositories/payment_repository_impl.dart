@@ -1,31 +1,33 @@
-import 'dart:convert';
-
 import 'package:drift/drift.dart';
 import 'package:injectable/injectable.dart';
 import 'package:parkflow_manager/core/database/app_database.dart';
 import 'package:parkflow_manager/core/error/exceptions.dart';
 import 'package:parkflow_manager/core/error/failures.dart';
 import 'package:parkflow_manager/core/network/network_info.dart';
+import 'package:parkflow_manager/core/services/outbox_service.dart';
 import 'package:parkflow_manager/core/utils/either.dart';
 import 'package:parkflow_manager/features/payment/data/datasources/payment_local_datasource.dart';
 import 'package:parkflow_manager/features/payment/data/datasources/payment_remote_datasource.dart';
 import 'package:parkflow_manager/features/payment/data/models/payment_model.dart';
 import 'package:parkflow_manager/features/payment/domain/entities/payment.dart';
+import 'package:parkflow_manager/features/payment/domain/entities/qr_payment_session.dart';
 import 'package:parkflow_manager/features/payment/domain/repositories/payment_repository.dart';
 
 @Injectable(as: PaymentRepository)
 class PaymentRepositoryImpl implements PaymentRepository {
-
   PaymentRepositoryImpl({
     required this.localDataSource,
     required this.remoteDataSource,
     required this.networkInfo,
     required this.database,
+    required this.outboxService,
   });
+
   final PaymentLocalDataSource localDataSource;
   final PaymentRemoteDataSource remoteDataSource;
   final NetworkInfo networkInfo;
   final AppDatabase database;
+  final OutboxService outboxService;
 
   @override
   Future<Either<Failure, Payment>> processPayment({
@@ -35,9 +37,8 @@ class PaymentRepositoryImpl implements PaymentRepository {
   }) async {
     if (method == PaymentMethod.cash) {
       return recordCashPayment(sessionId: sessionId, amount: amount);
-    } else {
-      return _processDigitalPayment(sessionId: sessionId, amount: amount);
     }
+    return _processDigitalPayment(sessionId: sessionId, amount: amount);
   }
 
   @override
@@ -46,39 +47,37 @@ class PaymentRepositoryImpl implements PaymentRepository {
     required double amount,
   }) async {
     try {
-      final now = DateTime.now();
-      final paymentId = await localDataSource.insertPayment(
-        PaymentsCompanion(
-          sessionId: Value(sessionId),
-          amount: Value(amount),
-          method: const Value('cash'),
-          status: const Value('completed'),
-          paidAt: Value(now),
-          isSynced: const Value(false),
-        ),
-      );
+      final paymentData = await database.transaction<PaymentData>(() async {
+        final now = DateTime.now();
+        final paymentId = await localDataSource.insertPayment(
+          PaymentsCompanion(
+            sessionId: Value(sessionId),
+            amount: Value(amount),
+            method: const Value('cash'),
+            status: Value(PaymentModel.statusToString(PaymentStatus.completed)),
+            paidAt: Value(now),
+            isSynced: const Value(false),
+          ),
+        );
 
-      // Queue for sync
-      await database.into(database.syncQueue).insert(
-            SyncQueueCompanion(
-              entityName: const Value('payments'),
-              recordId: Value(paymentId),
-              operation: const Value('create'),
-              payload: Value(jsonEncode({
-                'session_id': sessionId,
-                'amount': amount,
-                'method': 'cash',
-                'paid_at': now.toIso8601String(),
-              })),
-            ),
-          );
+        await outboxService.enqueue(
+          entityName: 'payments',
+          recordId: paymentId,
+          operation: 'create',
+          payload: {
+            'session_id': sessionId,
+            'amount': amount,
+            'method': 'cash',
+            'paid_at': now.toIso8601String(),
+          },
+        );
 
-      final paymentData = await localDataSource.getPaymentById(paymentId);
+        return localDataSource.getPaymentById(paymentId);
+      });
+
       return Right(_mapPaymentDataToEntity(paymentData));
     } catch (e) {
-      return Left(
-        CacheFailure(message: 'Failed to record cash payment: $e'),
-      );
+      return Left(CacheFailure(message: 'Failed to record cash payment: $e'));
     }
   }
 
@@ -96,13 +95,17 @@ class PaymentRepositoryImpl implements PaymentRepository {
     }
 
     try {
-      // Create pending payment locally
+      final existing = await localDataSource.getPaymentBySessionId(sessionId);
+      if (existing != null && existing.status == 'pending') {
+        return Right(_mapPaymentDataToEntity(existing));
+      }
+
       final paymentId = await localDataSource.insertPayment(
         PaymentsCompanion(
           sessionId: Value(sessionId),
           amount: Value(amount),
           method: const Value('digital'),
-          status: const Value('pending'),
+          status: Value(PaymentModel.statusToString(PaymentStatus.pending)),
           isSynced: const Value(false),
         ),
       );
@@ -110,15 +113,15 @@ class PaymentRepositoryImpl implements PaymentRepository {
       final paymentData = await localDataSource.getPaymentById(paymentId);
       return Right(_mapPaymentDataToEntity(paymentData));
     } catch (e) {
-      return Left(
-        ServerFailure(message: 'Failed to initiate digital payment: $e'),
-      );
+      return Left(ServerFailure(message: 'Failed to initiate digital payment: $e'));
     }
   }
 
   @override
-  Future<Either<Failure, String>> fetchQrCode(
-      int sessionId, double amount) async {
+  Future<Either<Failure, QrPaymentSession>> fetchQrCode(
+    int sessionId,
+    double amount,
+  ) async {
     if (!await networkInfo.isConnected) {
       return const Left(
         NetworkFailure(
@@ -128,8 +131,8 @@ class PaymentRepositoryImpl implements PaymentRepository {
     }
 
     try {
-      final qrUrl = await remoteDataSource.fetchQrCode(sessionId, amount);
-      return Right(qrUrl);
+      final qrSession = await remoteDataSource.fetchQrCode(sessionId, amount);
+      return Right(qrSession);
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message, code: e.statusCode));
     }
@@ -137,22 +140,22 @@ class PaymentRepositoryImpl implements PaymentRepository {
 
   @override
   Future<Either<Failure, Payment>> confirmDigitalPayment(
-      String transactionRef) async {
+    String transactionRef,
+  ) async {
     try {
       final remotePayment =
           await remoteDataSource.confirmDigitalPayment(transactionRef);
 
-      // Update local record
       final localPayment =
           await localDataSource.getPaymentBySessionId(remotePayment.sessionId);
       if (localPayment != null) {
         await localDataSource.updatePayment(
           localPayment.id,
           PaymentsCompanion(
-            status: const Value('completed'),
+            status: Value(remotePayment.status),
             transactionRef: Value(transactionRef),
-            paidAt: Value(DateTime.now()),
-            isSynced: const Value(true),
+            paidAt: Value(remotePayment.paidAt ?? DateTime.now()),
+            isSynced: Value(remotePayment.status == 'completed'),
           ),
         );
       }
@@ -169,11 +172,8 @@ class PaymentRepositoryImpl implements PaymentRepository {
     DateTime end,
   ) async {
     try {
-      final payments =
-          await localDataSource.getPaymentsByDateRange(start, end);
-      return Right(
-        payments.map(_mapPaymentDataToEntity).toList(),
-      );
+      final payments = await localDataSource.getPaymentsByDateRange(start, end);
+      return Right(payments.map(_mapPaymentDataToEntity).toList());
     } catch (e) {
       return Left(CacheFailure(message: 'Failed to get payments: $e'));
     }

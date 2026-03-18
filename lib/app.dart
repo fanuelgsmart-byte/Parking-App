@@ -1,8 +1,13 @@
+﻿import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:parkflow_manager/core/di/injection.dart';
+import 'package:parkflow_manager/core/network/sync_coordinator.dart';
+import 'package:parkflow_manager/core/network/sync_health_cubit.dart';
 import 'package:parkflow_manager/core/router/app_router.dart';
 import 'package:parkflow_manager/core/services/biometric_service.dart';
+import 'package:parkflow_manager/core/services/incident_cubit.dart';
 import 'package:parkflow_manager/core/services/session_timeout_service.dart';
 import 'package:parkflow_manager/core/theme/app_theme.dart';
 import 'package:parkflow_manager/features/auth/presentation/bloc/auth_bloc.dart';
@@ -24,10 +29,8 @@ class _ParkFlowAppState extends State<ParkFlowApp> with WidgetsBindingObserver {
   late final AuthBloc _authBloc;
   late final AppRouter _appRouter;
   late final SessionTimeoutService _timeoutService;
+  late final SyncCoordinator _syncCoordinator;
   final BiometricService _biometricService = BiometricService();
-
-  /// Tracks when the app was last paused — used to decide if biometric
-  /// re-authentication is needed on resume.
   DateTime? _pausedAt;
   static const _biometricLockDelay = Duration(minutes: 2);
 
@@ -37,12 +40,12 @@ class _ParkFlowAppState extends State<ParkFlowApp> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
 
     _authBloc = getIt<AuthBloc>()..add(const AuthCheckRequested());
-    _appRouter = AppRouter(authBloc: _authBloc);
+    _appRouter = AppRouter(authBloc: _authBloc, serviceLocator: getIt);
+    _syncCoordinator = getIt<SyncCoordinator>()..start();
 
     _timeoutService = SessionTimeoutService(
       timeout: const Duration(minutes: 15),
       onTimeout: () {
-        // Auto-logout on inactivity
         _authBloc.add(const AuthLogoutRequested());
       },
     );
@@ -52,6 +55,7 @@ class _ParkFlowAppState extends State<ParkFlowApp> with WidgetsBindingObserver {
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _timeoutService.stop();
+    unawaited(_syncCoordinator.stop());
     super.dispose();
   }
 
@@ -63,6 +67,7 @@ class _ParkFlowAppState extends State<ParkFlowApp> with WidgetsBindingObserver {
         _pausedAt = DateTime.now();
       case AppLifecycleState.resumed:
         _onAppResumed();
+        _syncCoordinator.triggerSync();
       case AppLifecycleState.inactive:
       case AppLifecycleState.detached:
         break;
@@ -70,7 +75,6 @@ class _ParkFlowAppState extends State<ParkFlowApp> with WidgetsBindingObserver {
   }
 
   Future<void> _onAppResumed() async {
-    // Only require biometric if user is logged in and was away long enough
     if (_authBloc.state is! AuthAuthenticated) return;
     if (_pausedAt == null) return;
 
@@ -98,6 +102,8 @@ class _ParkFlowAppState extends State<ParkFlowApp> with WidgetsBindingObserver {
         BlocProvider(create: (_) => getIt<LotMapCubit>()),
         BlocProvider(create: (_) => getIt<ReportsCubit>()),
         BlocProvider(create: (_) => getIt<EmployeeCubit>()),
+        BlocProvider(create: (_) => getIt<IncidentCubit>()),
+        BlocProvider(create: (_) => getIt<SyncHealthCubit>()..load()),
       ],
       child: SessionTimeoutListener(
         timeoutService: _timeoutService,

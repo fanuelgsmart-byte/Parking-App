@@ -1,27 +1,31 @@
-import 'package:injectable/injectable.dart';
+﻿import 'package:injectable/injectable.dart';
 import 'package:parkflow_manager/core/error/exceptions.dart';
 import 'package:parkflow_manager/core/error/failures.dart';
 import 'package:parkflow_manager/core/network/network_info.dart';
 import 'package:parkflow_manager/core/utils/either.dart';
 import 'package:parkflow_manager/features/auth/data/datasources/auth_local_datasource.dart';
 import 'package:parkflow_manager/features/auth/data/datasources/auth_remote_datasource.dart';
-import 'package:parkflow_manager/features/auth/domain/entities/user.dart';
+import 'package:parkflow_manager/features/auth/data/models/auth_session_model.dart';
+import 'package:parkflow_manager/features/auth/domain/entities/auth_session.dart';
 import 'package:parkflow_manager/features/auth/domain/repositories/auth_repository.dart';
 
 @Injectable(as: AuthRepository)
 class AuthRepositoryImpl implements AuthRepository {
-
   AuthRepositoryImpl({
     required this.remoteDataSource,
     required this.localDataSource,
     required this.networkInfo,
   });
+
   final AuthRemoteDataSource remoteDataSource;
   final AuthLocalDataSource localDataSource;
   final NetworkInfo networkInfo;
 
   @override
-  Future<Either<Failure, User>> login(String email, String password) async {
+  Future<Either<Failure, AuthSession>> login(
+    String email,
+    String password,
+  ) async {
     if (!await networkInfo.isConnected) {
       return const Left(
         NetworkFailure(message: 'Internet connection required to login.'),
@@ -29,9 +33,9 @@ class AuthRepositoryImpl implements AuthRepository {
     }
 
     try {
-      final userModel = await remoteDataSource.login(email, password);
-      await localDataSource.cacheUser(userModel);
-      return Right(userModel.toEntity());
+      final sessionModel = await remoteDataSource.login(email, password);
+      await localDataSource.cacheSession(sessionModel);
+      return Right(sessionModel.toEntity());
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message, code: e.statusCode));
     } on CacheException catch (e) {
@@ -48,20 +52,37 @@ class AuthRepositoryImpl implements AuthRepository {
       await localDataSource.clearAll();
       return const Right(null);
     } on ServerException catch (e) {
-      // Still clear local data even if remote logout fails
       await localDataSource.clearAll();
       return Left(ServerFailure(message: e.message, code: e.statusCode));
     }
   }
 
   @override
-  Future<Either<Failure, User>> getCurrentUser() async {
+  Future<Either<Failure, AuthSession>> getCurrentUser() async {
     try {
-      final cachedUser = await localDataSource.getCachedUser();
-      if (cachedUser != null) {
-        return Right(cachedUser.toEntity());
+      final cachedSession = await localDataSource.getCachedSession();
+      if (cachedSession == null) {
+        return const Left(AuthFailure(message: 'No user found. Please login.'));
       }
-      return const Left(AuthFailure(message: 'No user found. Please login.'));
+
+      if (cachedSession.toEntity().isAccessTokenExpired) {
+        final refreshed = await refreshToken();
+        if (refreshed.isLeft) {
+          await localDataSource.clearAll();
+          return const Left(
+            AuthFailure(message: 'Session expired. Please login again.'),
+          );
+        }
+        final afterRefresh = await localDataSource.getCachedSession();
+        if (afterRefresh == null) {
+          return const Left(
+            AuthFailure(message: 'Session refresh failed. Please login again.'),
+          );
+        }
+        return Right(afterRefresh.toEntity());
+      }
+
+      return Right(cachedSession.toEntity());
     } on CacheException catch (e) {
       return Left(CacheFailure(message: e.message));
     }
@@ -79,7 +100,38 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<Either<Failure, void>> refreshToken() async {
-    // Handled by Dio interceptor automatically
-    return const Right(null);
+    if (!await networkInfo.isConnected) {
+      return const Left(
+        NetworkFailure(message: 'Internet connection required to refresh session.'),
+      );
+    }
+
+    try {
+      final refreshToken = await localDataSource.getRefreshToken();
+      if (refreshToken == null || refreshToken.isEmpty) {
+        return const Left(AuthFailure(message: 'No refresh token available.'));
+      }
+
+      final currentSession = await localDataSource.getCachedSession();
+      if (currentSession == null) {
+        return const Left(AuthFailure(message: 'No cached session to refresh.'));
+      }
+
+      final refreshed = await remoteDataSource.refreshToken(refreshToken);
+      final mergedBundle = AuthTokenRefreshModel(
+        accessToken: refreshed.accessToken,
+        refreshToken:
+            refreshed.refreshToken.isEmpty ? refreshToken : refreshed.refreshToken,
+        hmacKey: refreshed.hmacKey ?? currentSession.hmacKey,
+        accessTokenExpiresAt: refreshed.accessTokenExpiresAt,
+      );
+
+      await localDataSource.updateTokenBundle(mergedBundle);
+      return const Right(null);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message, code: e.statusCode));
+    } on CacheException catch (e) {
+      return Left(CacheFailure(message: e.message));
+    }
   }
 }

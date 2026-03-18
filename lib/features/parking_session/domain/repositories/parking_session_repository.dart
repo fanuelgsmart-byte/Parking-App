@@ -1,28 +1,32 @@
 import 'package:parkflow_manager/core/error/failures.dart';
+import 'package:parkflow_manager/core/session/app_session_context.dart';
 import 'package:parkflow_manager/core/utils/either.dart';
 import 'package:parkflow_manager/features/parking_session/domain/entities/parking_session.dart';
+import 'package:parkflow_manager/features/parking_session/domain/entities/vehicle.dart';
 
 abstract class ParkingSessionRepository {
-  Future<Either<Failure, List<ParkingSession>>> getActiveSessions(
-      String lotId);
+  Future<Either<Failure, List<ParkingSession>>> getOpenSessions(LotId lotId);
 
-  Stream<List<ParkingSession>> watchActiveSessions(String lotId);
+  Stream<List<ParkingSession>> watchOpenSessions(LotId lotId);
 
-  Future<Either<Failure, ParkingSession>> getSessionById(int id);
+  Future<Either<Failure, ParkingSession>> getSessionById(SessionId id);
 
   Future<Either<Failure, ParkingSession>> createSession({
     required String licensePlate,
-    required String vehicleSize,
+    required VehicleSize vehicleSize,
     required String vehicleColor,
-    required int spotId,
-    required String lotId,
-    required String employeeId,
+    required LotId lotId,
+    required EmployeeId employeeId,
   });
 
-  Future<Either<Failure, ParkingSession>> flagForCheckout(int sessionId);
+  Future<Either<Failure, ParkingSession>> flagForCheckout(SessionId sessionId);
+
+  Future<Either<Failure, ParkingSession>> markPaymentPending(
+    SessionId sessionId,
+  );
 
   Future<Either<Failure, ParkingSession>> completeSession(
-    int sessionId, {
+    SessionId sessionId, {
     required double totalFee,
   });
 

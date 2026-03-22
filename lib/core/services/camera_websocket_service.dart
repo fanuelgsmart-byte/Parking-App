@@ -78,6 +78,54 @@ class SessionCreatedEvent {
   final DateTime timestamp;
 }
 
+/// Payload emitted when an exit camera detects a vehicle leaving.
+/// Contains session details and estimated fee for the employee to process.
+class VehicleExitingEvent {
+
+  const VehicleExitingEvent({
+    required this.sessionId,
+    required this.licensePlate,
+    required this.vehicleSize,
+    required this.vehicleColor,
+    required this.spotNumber,
+    required this.entryTime,
+    required this.durationMinutes,
+    required this.estimatedFee,
+    required this.timestamp,
+    this.imageUrl,
+  });
+
+  factory VehicleExitingEvent.fromJson(Map<String, dynamic> json) {
+    return VehicleExitingEvent(
+      sessionId: json['session_id'] as int,
+      licensePlate: json['license_plate'] as String,
+      vehicleSize: json['vehicle_size'] as String? ?? 'medium',
+      vehicleColor: json['vehicle_color'] as String? ?? 'unknown',
+      spotNumber: json['spot_number'] as String? ?? '',
+      entryTime: json['entry_time'] != null
+          ? DateTime.parse(json['entry_time'] as String)
+          : DateTime.now(),
+      durationMinutes: json['duration_minutes'] as int? ?? 0,
+      estimatedFee: (json['estimated_fee'] as num?)?.toDouble() ?? 0.0,
+      imageUrl: json['image_url'] as String?,
+      timestamp: json['timestamp'] != null
+          ? DateTime.parse(json['timestamp'] as String)
+          : DateTime.now(),
+    );
+  }
+
+  final int sessionId;
+  final String licensePlate;
+  final String vehicleSize;
+  final String vehicleColor;
+  final String spotNumber;
+  final DateTime entryTime;
+  final int durationMinutes;
+  final double estimatedFee;
+  final String? imageUrl;
+  final DateTime timestamp;
+}
+
 /// Manages the WebSocket connection to the ALPR camera system.
 ///
 /// Security improvements over naive implementation:
@@ -91,6 +139,8 @@ class CameraWebSocketService {
   final StreamController<PlateDetectionEvent> _plateController =
       StreamController.broadcast();
   final StreamController<SessionCreatedEvent> _sessionController =
+      StreamController.broadcast();
+  final StreamController<VehicleExitingEvent> _exitController =
       StreamController.broadcast();
   final StreamController<ConnectionStatus> _statusController =
       StreamController.broadcast();
@@ -113,6 +163,9 @@ class CameraWebSocketService {
   /// Emitted when the AI backend automatically creates a session from a
   /// camera detection, before the local DB sync completes.
   Stream<SessionCreatedEvent> get sessionStream => _sessionController.stream;
+
+  /// Stream of vehicle exiting events from exit cameras.
+  Stream<VehicleExitingEvent> get exitStream => _exitController.stream;
 
   /// Stream of WebSocket connection status changes.
   Stream<ConnectionStatus> get statusStream => _statusController.stream;
@@ -197,6 +250,14 @@ class CameraWebSocketService {
           final event = SessionCreatedEvent.fromJson(payload);
           _sessionController.add(event);
 
+        case 'vehicle_exiting':
+          if (!_authenticated) return;
+          final payload = json['payload'];
+          if (payload is! Map<String, dynamic>) return;
+          if (!payload.containsKey('session_id')) return;
+          final event = VehicleExitingEvent.fromJson(payload);
+          _exitController.add(event);
+
         case 'pong':
           // Heartbeat response — connection is alive
           break;
@@ -261,6 +322,7 @@ class CameraWebSocketService {
     _channel?.sink.close();
     _plateController.close();
     _sessionController.close();
+    _exitController.close();
     _statusController.close();
   }
 }

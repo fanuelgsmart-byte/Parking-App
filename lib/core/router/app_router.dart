@@ -6,6 +6,9 @@ import 'package:parkflow_manager/features/auth/domain/entities/user.dart';
 import 'package:parkflow_manager/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:parkflow_manager/features/auth/presentation/bloc/auth_state.dart';
 import 'package:parkflow_manager/features/auth/presentation/pages/login_page.dart';
+import 'package:parkflow_manager/features/camera_management/presentation/bloc/camera_cubit.dart';
+import 'package:parkflow_manager/features/camera_management/presentation/pages/camera_management_page.dart';
+import 'package:parkflow_manager/features/camera_management/presentation/pages/camera_pair_page.dart';
 import 'package:parkflow_manager/features/employee_management/presentation/pages/employee_management_page.dart';
 import 'package:parkflow_manager/features/lot_map/presentation/pages/lot_map_page.dart';
 import 'package:parkflow_manager/features/parking_session/presentation/pages/employee_dashboard_page.dart';
@@ -86,6 +89,34 @@ class AppRouter {
                 lotId: authState.context.requireLotId(),
               );
             },
+          ),
+          GoRoute(
+            path: 'cameras',
+            name: 'camera-management',
+            builder: (context, state) {
+              final authState = authBloc.state;
+              if (authState is! AuthAuthenticated ||
+                  !authState.context.hasLotAccess) {
+                return const _MissingLotScopePage();
+              }
+              final lotId = authState.context.requireLotId();
+              return BlocProvider(
+                create: (_) => _serviceLocator<CameraCubit>(),
+                child: CameraManagementPage(lotId: lotId),
+              );
+            },
+            routes: [
+              GoRoute(
+                path: 'pair',
+                name: 'camera-pair',
+                builder: (context, state) {
+                  return BlocProvider(
+                    create: (_) => _serviceLocator<CameraCubit>(),
+                    child: const CameraPairPage(),
+                  );
+                },
+              ),
+            ],
           ),
           GoRoute(
             path: 'rates',

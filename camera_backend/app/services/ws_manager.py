@@ -75,6 +75,40 @@ class ConnectionManager:
             },
         )
 
+    async def broadcast_vehicle_exiting(
+        self,
+        lot_id: str,
+        *,
+        session_id: int,
+        license_plate: str,
+        vehicle_size: str,
+        vehicle_color: str,
+        spot_number: str,
+        entry_time: str,
+        duration_minutes: int,
+        estimated_fee: float,
+        image_url: str | None,
+        timestamp: str,
+    ) -> None:
+        await self.broadcast(
+            lot_id,
+            {
+                "type": "vehicle_exiting",
+                "payload": {
+                    "session_id": session_id,
+                    "license_plate": license_plate,
+                    "vehicle_size": vehicle_size,
+                    "vehicle_color": vehicle_color,
+                    "spot_number": spot_number,
+                    "entry_time": entry_time,
+                    "duration_minutes": duration_minutes,
+                    "estimated_fee": estimated_fee,
+                    "image_url": image_url,
+                    "timestamp": timestamp,
+                },
+            },
+        )
+
 
 # Singleton shared across the whole application
 manager = ConnectionManager()

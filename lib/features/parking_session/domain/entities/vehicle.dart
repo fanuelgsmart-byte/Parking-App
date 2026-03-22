@@ -11,6 +11,7 @@ abstract class Vehicle with _$Vehicle {
     required VehicleSize size,
     required String color,
     required DateTime createdAt,
+    String? imageUrl,
   }) = _Vehicle;
 
   factory Vehicle.fromJson(Map<String, dynamic> json) =>

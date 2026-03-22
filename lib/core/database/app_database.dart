@@ -8,6 +8,20 @@ class Vehicles extends Table {
   TextColumn get licensePlate => text().withLength(min: 1, max: 20)();
   TextColumn get size => text()();
   TextColumn get color => text()();
+  // URL to the captured JPEG image saved by the camera backend
+  TextColumn get imageUrl => text().nullable()();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+}
+
+@DataClassName('CameraDeviceData')
+class CameraDevices extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get lotId => text()();
+  TextColumn get name => text()();
+  // SHA-256 hex digest of the raw api_key — never store plain key
+  TextColumn get apiKeyHash => text().unique()();
+  BoolColumn get isActive => boolean().withDefault(const Constant(true))();
+  DateTimeColumn get lastSeenAt => dateTime().nullable()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 }
 
@@ -124,6 +138,7 @@ class ReportCaches extends Table {
 
 @DriftDatabase(tables: [
   Vehicles,
+  CameraDevices,
   ParkingSpots,
   ParkingSessions,
   Payments,
@@ -137,7 +152,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase(super.e);
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration {
@@ -156,6 +171,10 @@ class AppDatabase extends _$AppDatabase {
           await m.addColumn(syncQueue, syncQueue.remoteVersion);
           await m.addColumn(syncQueue, syncQueue.deadLettered);
           await m.createTable(reportCaches);
+        }
+        if (from < 3) {
+          await m.addColumn(vehicles, vehicles.imageUrl);
+          await m.createTable(cameraDevices);
         }
         await _createEnterpriseIndexes();
       },

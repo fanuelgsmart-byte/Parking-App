@@ -1,0 +1,21 @@
+version: "3.9"
+
+services:
+  backend:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./parkflow.db:/app/parkflow.db
+      - ./captured_images:/app/captured_images
+    environment:
+      - DATABASE_URL=sqlite:///./parkflow.db
+      - SECRET_KEY=${SECRET_KEY:-change-me-in-production}
+      - STATIC_BASE_URL=${STATIC_BASE_URL:-http://localhost:8000}
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-http://localhost}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3

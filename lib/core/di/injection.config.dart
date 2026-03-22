@@ -105,6 +105,14 @@ import 'package:parkflow_manager/features/reports/presentation/bloc/rate_config_
     as _i62;
 import 'package:parkflow_manager/features/reports/presentation/bloc/reports_cubit.dart'
     as _i705;
+import 'package:parkflow_manager/features/superadmin/data/datasources/superadmin_remote_datasource.dart'
+    as _i500;
+import 'package:parkflow_manager/features/superadmin/data/repositories/superadmin_repository_impl.dart'
+    as _i501;
+import 'package:parkflow_manager/features/superadmin/domain/repositories/superadmin_repository.dart'
+    as _i502;
+import 'package:parkflow_manager/features/superadmin/presentation/bloc/superadmin_cubit.dart'
+    as _i503;
 
 extension GetItInjectableX on _i174.GetIt {
   // initializes the registration of main-scope dependencies inside of GetIt
@@ -303,6 +311,19 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i942.LotMapCubit>(
       () => _i942.LotMapCubit(lotRepository: gh<_i921.LotRepository>()),
+    );
+    gh.factory<_i500.SuperadminRemoteDataSource>(
+      () =>
+          _i500.SuperadminRemoteDataSourceImpl(apiClient: gh<_i100.ApiClient>()),
+    );
+    gh.factory<_i502.SuperadminRepository>(
+      () => _i501.SuperadminRepositoryImpl(
+        remoteDataSource: gh<_i500.SuperadminRemoteDataSource>(),
+      ),
+    );
+    gh.factory<_i503.SuperadminCubit>(
+      () =>
+          _i503.SuperadminCubit(repository: gh<_i502.SuperadminRepository>()),
     );
     return this;
   }

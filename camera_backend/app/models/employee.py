@@ -15,7 +15,7 @@ class Employee(Base):
     name: Mapped[str] = mapped_column(String(120), nullable=False)
     email: Mapped[str] = mapped_column(String(254), unique=True, nullable=False)
     password_hash: Mapped[str] = mapped_column(String(256), nullable=False)
-    role: Mapped[str] = mapped_column(String(20), default="employee")  # employee / manager
+    role: Mapped[str] = mapped_column(String(20), default="employee")  # employee / manager / superadmin
     assigned_lot_id: Mapped[str | None] = mapped_column(
         String(36), ForeignKey("parking_lots.id"), nullable=True, index=True
     )

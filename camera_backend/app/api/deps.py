@@ -45,8 +45,14 @@ def get_current_employee(
 
 
 def require_manager(emp: Employee = Depends(get_current_employee)) -> Employee:
-    if emp.role != "manager":
+    if emp.role not in ("manager", "superadmin"):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Manager access required.")
+    return emp
+
+
+def require_superadmin(emp: Employee = Depends(get_current_employee)) -> Employee:
+    if emp.role != "superadmin":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Superadmin access required.")
     return emp
 
 

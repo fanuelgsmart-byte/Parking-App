@@ -11,7 +11,7 @@ from app.config import settings
 from app.database import create_tables
 
 # API routers
-from app.api import auth, camera_ingest, employees, lots, payments, rates, reports, sessions
+from app.api import auth, camera_ingest, employees, lots, payments, rates, reports, sessions, superadmin
 from app.ws import camera_ws
 
 app = FastAPI(
@@ -49,6 +49,7 @@ app.include_router(payments.router)
 app.include_router(rates.router)
 app.include_router(reports.router)
 app.include_router(camera_ingest.router)
+app.include_router(superadmin.router)
 app.include_router(camera_ws.router)
 
 

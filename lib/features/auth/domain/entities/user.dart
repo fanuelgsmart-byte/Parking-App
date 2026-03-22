@@ -18,10 +18,12 @@ abstract class User with _$User {
 
 enum UserRole {
   employee,
-  manager;
+  manager,
+  superadmin;
 
   bool get isManager => this == UserRole.manager;
   bool get isEmployee => this == UserRole.employee;
+  bool get isSuperadmin => this == UserRole.superadmin;
 
   String get label {
     switch (this) {
@@ -29,6 +31,8 @@ enum UserRole {
         return 'Employee';
       case UserRole.manager:
         return 'Manager';
+      case UserRole.superadmin:
+        return 'Super Admin';
     }
   }
 }

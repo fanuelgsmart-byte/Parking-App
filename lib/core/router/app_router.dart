@@ -17,6 +17,14 @@ import 'package:parkflow_manager/features/payment/presentation/pages/checkout_pa
 import 'package:parkflow_manager/features/reports/presentation/bloc/rate_config_cubit.dart';
 import 'package:parkflow_manager/features/reports/presentation/pages/manager_dashboard_page.dart';
 import 'package:parkflow_manager/features/reports/presentation/pages/rate_config_page.dart';
+import 'package:parkflow_manager/features/superadmin/presentation/pages/superadmin_dashboard_page.dart';
+import 'package:parkflow_manager/features/superadmin/presentation/pages/lot_management_page.dart';
+import 'package:parkflow_manager/features/superadmin/presentation/pages/spot_management_page.dart';
+import 'package:parkflow_manager/features/superadmin/presentation/pages/system_reports_page.dart';
+import 'package:parkflow_manager/features/superadmin/presentation/pages/all_employees_page.dart';
+import 'package:parkflow_manager/features/superadmin/presentation/pages/camera_overview_page.dart';
+import 'package:parkflow_manager/features/superadmin/presentation/pages/audit_log_page.dart';
+import 'package:parkflow_manager/features/superadmin/presentation/bloc/superadmin_cubit.dart';
 
 class AppRouter {
   AppRouter({required this.authBloc, GetIt? serviceLocator})
@@ -136,6 +144,68 @@ class AppRouter {
           ),
         ],
       ),
+      GoRoute(
+        path: '/superadmin',
+        name: 'superadmin-dashboard',
+        builder: (context, state) => BlocProvider(
+          create: (_) => _serviceLocator<SuperadminCubit>()..loadDashboard(),
+          child: const SuperadminDashboardPage(),
+        ),
+        routes: [
+          GoRoute(
+            path: 'lots',
+            name: 'superadmin-lots',
+            builder: (context, state) => BlocProvider(
+              create: (_) => _serviceLocator<SuperadminCubit>()..loadLots(),
+              child: const LotManagementPage(),
+            ),
+          ),
+          GoRoute(
+            path: 'lots/:lotId/spots',
+            name: 'superadmin-spots',
+            builder: (context, state) {
+              final lotId = state.pathParameters['lotId'] ?? '';
+              final lotName = state.uri.queryParameters['lotName'] ?? 'Lot';
+              return BlocProvider(
+                create: (_) => _serviceLocator<SuperadminCubit>()..loadSpots(lotId),
+                child: SpotManagementPage(lotId: lotId, lotName: lotName),
+              );
+            },
+          ),
+          GoRoute(
+            path: 'reports',
+            name: 'superadmin-reports',
+            builder: (context, state) => BlocProvider(
+              create: (_) => _serviceLocator<SuperadminCubit>(),
+              child: const SystemReportsPage(),
+            ),
+          ),
+          GoRoute(
+            path: 'employees',
+            name: 'superadmin-employees',
+            builder: (context, state) => BlocProvider(
+              create: (_) => _serviceLocator<SuperadminCubit>()..loadEmployees(),
+              child: const AllEmployeesPage(),
+            ),
+          ),
+          GoRoute(
+            path: 'cameras',
+            name: 'superadmin-cameras',
+            builder: (context, state) => BlocProvider(
+              create: (_) => _serviceLocator<SuperadminCubit>()..loadCameras(),
+              child: const CameraOverviewPage(),
+            ),
+          ),
+          GoRoute(
+            path: 'audit-log',
+            name: 'superadmin-audit-log',
+            builder: (context, state) => BlocProvider(
+              create: (_) => _serviceLocator<SuperadminCubit>()..loadAuditLog(),
+              child: const AuditLogPage(),
+            ),
+          ),
+        ],
+      ),
     ],
   );
 
@@ -149,11 +219,24 @@ class AppRouter {
     }
 
     if (authState is AuthAuthenticated && isOnLogin) {
-      return authState.user.role == UserRole.manager ? '/manager' : '/employee';
+      switch (authState.user.role) {
+        case UserRole.superadmin:
+          return '/superadmin';
+        case UserRole.manager:
+          return '/manager';
+        case UserRole.employee:
+          return '/employee';
+      }
     }
 
     if (authState is AuthAuthenticated) {
       final role = authState.user.role;
+      // Superadmin can access everything
+      if (role == UserRole.superadmin) return null;
+      // Block non-superadmins from superadmin routes
+      if (role != UserRole.superadmin && location.startsWith('/superadmin')) {
+        return role == UserRole.manager ? '/manager' : '/employee';
+      }
       if (role == UserRole.employee && location.startsWith('/manager')) {
         return '/employee';
       }

@@ -57,4 +57,15 @@ class ApiConstants {
   static const String cameraDevices = '/camera/devices';
   static const String cameraFrame = '/camera/frame';
   static const String cameraWebSocket = '$wsBaseUrl/camera';
+
+  // Superadmin
+  static const String superadminDashboard = '/superadmin/dashboard';
+  static const String superadminLots = '/superadmin/lots';
+  static const String superadminLotSpots = '/superadmin/lots/{id}/spots';
+  static const String superadminReportsRevenue = '/superadmin/reports/revenue';
+  static const String superadminReportsOccupancy = '/superadmin/reports/occupancy';
+  static const String superadminEmployees = '/superadmin/employees';
+  static const String superadminCameras = '/superadmin/cameras';
+  static const String superadminCameraPreRegister = '/superadmin/cameras/pre-register';
+  static const String superadminAuditLog = '/superadmin/audit-log';
 }

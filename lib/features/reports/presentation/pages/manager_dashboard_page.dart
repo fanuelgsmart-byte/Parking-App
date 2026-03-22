@@ -46,6 +46,10 @@ class _ManagerDashboardPageState extends State<ManagerDashboardPage> {
         title: const Text('Manager Dashboard'),
         actions: [
           IconButton(
+            icon: const Icon(Icons.videocam_outlined),
+            onPressed: () => context.goNamed('camera-management'),
+          ),
+          IconButton(
             icon: const Icon(Icons.people_alt_rounded),
             onPressed: () => context.goNamed('employee-management'),
           ),

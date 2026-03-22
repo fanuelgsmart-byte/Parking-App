@@ -131,3 +131,23 @@ def create_session_from_camera(
     db.refresh(vehicle)
     logger.info("Session %d created for plate %s at spot %s.", session.id, license_plate, spot.spot_number)
     return session
+
+
+def find_active_session_by_plate(
+    db: Session, license_plate: str, lot_id: str
+) -> ParkingSession | None:
+    """
+    Find an open session for this plate in this lot.
+
+    Used by exit cameras to look up the session for a departing vehicle.
+    """
+    return (
+        db.query(ParkingSession)
+        .join(Vehicle)
+        .filter(
+            Vehicle.license_plate == license_plate,
+            ParkingSession.lot_id == lot_id,
+            ParkingSession.status.in_(_OPEN_STATUSES),
+        )
+        .first()
+    )

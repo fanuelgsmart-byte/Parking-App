@@ -29,6 +29,7 @@ class _EmployeeDashboardPageState extends State<EmployeeDashboardPage> {
   late final CameraWebSocketService _cameraService;
   StreamSubscription<PlateDetectionEvent>? _plateSub;
   StreamSubscription<SessionCreatedEvent>? _sessionCreatedSub;
+  StreamSubscription<VehicleExitingEvent>? _exitSub;
   StreamSubscription<ConnectionStatus>? _statusSub;
   ConnectionStatus _cameraStatus = ConnectionStatus.disconnected;
   String? _lastDetectedPlate;
@@ -47,6 +48,7 @@ class _EmployeeDashboardPageState extends State<EmployeeDashboardPage> {
       _cameraService.connect(lotId, authToken: authState.session.accessToken);
       _plateSub = _cameraService.plateStream.listen(_onPlateDetected);
       _sessionCreatedSub = _cameraService.sessionStream.listen(_onSessionCreated);
+      _exitSub = _cameraService.exitStream.listen(_onVehicleExiting);
       _statusSub = _cameraService.statusStream.listen((status) {
         if (mounted) {
           setState(() => _cameraStatus = status);
@@ -59,6 +61,7 @@ class _EmployeeDashboardPageState extends State<EmployeeDashboardPage> {
   void dispose() {
     _plateSub?.cancel();
     _sessionCreatedSub?.cancel();
+    _exitSub?.cancel();
     _statusSub?.cancel();
     _cameraService.dispose();
     super.dispose();
@@ -74,6 +77,29 @@ class _EmployeeDashboardPageState extends State<EmployeeDashboardPage> {
           label: 'Check In',
           onPressed: () =>
               _showCheckInDialog(context, prefillPlate: event.licensePlate),
+        ),
+      ),
+    );
+  }
+
+  void _onVehicleExiting(VehicleExitingEvent event) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        backgroundColor: AppTheme.warningColor,
+        duration: const Duration(seconds: 6),
+        content: Text(
+          '${event.licensePlate} is leaving — '
+          'Spot ${event.spotNumber} '
+          '• Est. fee \$${event.estimatedFee.toStringAsFixed(2)}',
+        ),
+        action: SnackBarAction(
+          label: 'Process Checkout',
+          textColor: Colors.white,
+          onPressed: () => context.goNamed(
+            'checkout',
+            pathParameters: {'sessionId': event.sessionId.toString()},
+          ),
         ),
       ),
     );

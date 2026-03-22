@@ -28,6 +28,7 @@ class EmployeeDashboardPage extends StatefulWidget {
 class _EmployeeDashboardPageState extends State<EmployeeDashboardPage> {
   late final CameraWebSocketService _cameraService;
   StreamSubscription<PlateDetectionEvent>? _plateSub;
+  StreamSubscription<SessionCreatedEvent>? _sessionCreatedSub;
   StreamSubscription<ConnectionStatus>? _statusSub;
   ConnectionStatus _cameraStatus = ConnectionStatus.disconnected;
   String? _lastDetectedPlate;
@@ -45,6 +46,7 @@ class _EmployeeDashboardPageState extends State<EmployeeDashboardPage> {
       context.read<SessionCubit>().watchSessions(lotId);
       _cameraService.connect(lotId, authToken: authState.session.accessToken);
       _plateSub = _cameraService.plateStream.listen(_onPlateDetected);
+      _sessionCreatedSub = _cameraService.sessionStream.listen(_onSessionCreated);
       _statusSub = _cameraService.statusStream.listen((status) {
         if (mounted) {
           setState(() => _cameraStatus = status);
@@ -56,6 +58,7 @@ class _EmployeeDashboardPageState extends State<EmployeeDashboardPage> {
   @override
   void dispose() {
     _plateSub?.cancel();
+    _sessionCreatedSub?.cancel();
     _statusSub?.cancel();
     _cameraService.dispose();
     super.dispose();
@@ -72,6 +75,26 @@ class _EmployeeDashboardPageState extends State<EmployeeDashboardPage> {
           onPressed: () =>
               _showCheckInDialog(context, prefillPlate: event.licensePlate),
         ),
+      ),
+    );
+  }
+
+  void _onSessionCreated(SessionCreatedEvent event) {
+    if (!mounted) return;
+    setState(() => _lastDetectedPlate = event.licensePlate);
+    // Refresh session list — the backend session will appear once the sync runs
+    final authState = context.read<AuthBloc>().state;
+    if (authState is AuthAuthenticated && authState.context.hasLotAccess) {
+      context.read<SessionCubit>().loadOpenSessions(authState.context.requireLotId());
+    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        backgroundColor: AppTheme.successColor,
+        content: Text(
+          '🚗 ${event.licensePlate} checked in automatically '
+          '— ${event.vehicleColor} ${event.vehicleSize}, spot ${event.spotNumber}',
+        ),
+        duration: const Duration(seconds: 4),
       ),
     );
   }
@@ -431,42 +454,327 @@ class _SessionCard extends StatelessWidget {
 
   final ParkingSession session;
 
+  Color get _statusColor {
+    switch (session.status) {
+      case SessionStatus.active:
+        return AppTheme.successColor;
+      case SessionStatus.flaggedForCheckout:
+        return AppTheme.warningColor;
+      case SessionStatus.paymentPending:
+        return AppTheme.secondary;
+      case SessionStatus.completed:
+        return Colors.grey;
+    }
+  }
+
+  String get _statusLabel {
+    switch (session.status) {
+      case SessionStatus.active:
+        return 'Active';
+      case SessionStatus.flaggedForCheckout:
+        return 'Checkout';
+      case SessionStatus.paymentPending:
+        return 'Payment';
+      case SessionStatus.completed:
+        return 'Done';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Card(
-      child: ListTile(
-        contentPadding: const EdgeInsets.all(16),
-        leading: CircleAvatar(
-          backgroundColor: AppTheme.primary.withValues(alpha: 0.12),
-          child: const Icon(Icons.directions_car_rounded, color: AppTheme.primary),
-        ),
-        title: Text(
-          session.vehicle.licensePlate,
-          style: const TextStyle(fontWeight: FontWeight.w700),
-        ),
-        subtitle: Padding(
-          padding: const EdgeInsets.only(top: 6),
-          child: Text(
-            '${session.vehicle.color} • ${session.vehicle.size.displayName} • ${session.formattedDuration} • Spot ${session.spotNumber}',
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () => _showSessionDetail(context),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header row: plate + status badge
+              Row(
+                children: [
+                  const Icon(Icons.directions_car_rounded,
+                      color: AppTheme.primary, size: 20),
+                  const SizedBox(width: 8),
+                  Text(
+                    session.vehicle.licensePlate,
+                    style: const TextStyle(
+                        fontWeight: FontWeight.w800, fontSize: 16),
+                  ),
+                  const Spacer(),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: _statusColor.withValues(alpha: 0.14),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      _statusLabel,
+                      style: TextStyle(
+                          color: _statusColor,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 12),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              // Colour + size badges
+              Wrap(
+                spacing: 6,
+                children: [
+                  _InfoChip(
+                    icon: Icons.palette_outlined,
+                    label: session.vehicle.color,
+                  ),
+                  _InfoChip(
+                    icon: Icons.straighten_outlined,
+                    label: session.vehicle.size.displayName,
+                  ),
+                  _InfoChip(
+                    icon: Icons.location_on_outlined,
+                    label: 'Spot ${session.spotNumber}',
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              // Entry time + duration row
+              Row(
+                children: [
+                  const Icon(Icons.access_time_rounded,
+                      size: 14, color: Colors.grey),
+                  const SizedBox(width: 4),
+                  Text(
+                    'In: ${DateFormat('h:mm a').format(session.entryTime)}',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                  const SizedBox(width: 12),
+                  const Icon(Icons.timer_outlined,
+                      size: 14, color: Colors.grey),
+                  const SizedBox(width: 4),
+                  Text(
+                    session.formattedDuration,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              // Action button
+              Align(
+                alignment: Alignment.centerRight,
+                child: session.status == SessionStatus.active
+                    ? OutlinedButton.icon(
+                        onPressed: () => context
+                            .read<SessionCubit>()
+                            .flagForCheckout(session.id),
+                        icon: const Icon(Icons.flag_outlined, size: 16),
+                        label: const Text('Flag for Checkout'),
+                      )
+                    : FilledButton.icon(
+                        onPressed: () => context.goNamed(
+                          'checkout',
+                          pathParameters: {
+                            'sessionId': session.id.toString()
+                          },
+                        ),
+                        icon: const Icon(Icons.payment_rounded, size: 16),
+                        label: Text(
+                          session.status == SessionStatus.paymentPending
+                              ? 'Resume Payment'
+                              : 'Checkout',
+                        ),
+                      ),
+              ),
+            ],
           ),
         ),
-        trailing: session.status == SessionStatus.active
-            ? FilledButton(
-                onPressed: () =>
-                    context.read<SessionCubit>().flagForCheckout(session.id),
-                child: const Text('Flag Checkout'),
-              )
-            : FilledButton(
-                onPressed: () => context.goNamed(
-                  'checkout',
-                  pathParameters: {'sessionId': session.id.toString()},
-                ),
-                child: Text(
-                  session.status == SessionStatus.paymentPending
-                      ? 'Resume Payment'
-                      : 'Checkout',
+      ),
+    );
+  }
+
+  void _showSessionDetail(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) => _SessionDetailSheet(session: session),
+    );
+  }
+}
+
+class _InfoChip extends StatelessWidget {
+  const _InfoChip({required this.icon, required this.label});
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: AppTheme.primary.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 13, color: AppTheme.primary),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: const TextStyle(
+                fontSize: 12,
+                color: AppTheme.primary,
+                fontWeight: FontWeight.w600),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SessionDetailSheet extends StatelessWidget {
+  const _SessionDetailSheet({required this.session});
+
+  final ParkingSession session;
+
+  @override
+  Widget build(BuildContext context) {
+    final imageUrl = session.vehicle.imageUrl;
+
+    return DraggableScrollableSheet(
+      initialChildSize: 0.6,
+      minChildSize: 0.4,
+      maxChildSize: 0.92,
+      expand: false,
+      builder: (_, controller) => ListView(
+        controller: controller,
+        padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+        children: [
+          // Drag handle
+          Center(
+            child: Container(
+              width: 40,
+              height: 4,
+              margin: const EdgeInsets.only(bottom: 16),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade300,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+          // Captured image (if available)
+          if (imageUrl != null)
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Image.network(
+                imageUrl,
+                height: 180,
+                width: double.infinity,
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => Container(
+                  height: 180,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade100,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Center(
+                    child: Icon(Icons.image_not_supported_outlined,
+                        size: 48, color: Colors.grey),
+                  ),
                 ),
               ),
+            )
+          else
+            Container(
+              height: 120,
+              decoration: BoxDecoration(
+                color: AppTheme.primary.withValues(alpha: 0.06),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Center(
+                child: Icon(Icons.directions_car_rounded,
+                    size: 56, color: AppTheme.primary),
+              ),
+            ),
+          const SizedBox(height: 20),
+          // Plate + status
+          Row(
+            children: [
+              Text(
+                session.vehicle.licensePlate,
+                style: const TextStyle(
+                    fontWeight: FontWeight.w800, fontSize: 22),
+              ),
+              const Spacer(),
+              Chip(
+                label: Text(session.status.name),
+                backgroundColor:
+                    AppTheme.primary.withValues(alpha: 0.1),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          _DetailRow(
+              icon: Icons.palette_outlined,
+              label: 'Colour',
+              value: session.vehicle.color),
+          _DetailRow(
+              icon: Icons.straighten_outlined,
+              label: 'Size',
+              value: session.vehicle.size.displayName),
+          _DetailRow(
+              icon: Icons.location_on_outlined,
+              label: 'Spot',
+              value: session.spotNumber),
+          _DetailRow(
+              icon: Icons.login_rounded,
+              label: 'Entry time',
+              value: DateFormat('EEE, MMM d • h:mm a')
+                  .format(session.entryTime)),
+          _DetailRow(
+              icon: Icons.timer_outlined,
+              label: 'Duration',
+              value: session.formattedDuration),
+          if (session.totalFee != null)
+            _DetailRow(
+                icon: Icons.attach_money_rounded,
+                label: 'Fee',
+                value: '\$${session.totalFee!.toStringAsFixed(2)}'),
+        ],
+      ),
+    );
+  }
+}
+
+class _DetailRow extends StatelessWidget {
+  const _DetailRow(
+      {required this.icon, required this.label, required this.value});
+
+  final IconData icon;
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        children: [
+          Icon(icon, size: 18, color: AppTheme.primary),
+          const SizedBox(width: 12),
+          Text(label,
+              style: const TextStyle(
+                  color: Colors.grey, fontWeight: FontWeight.w500)),
+          const Spacer(),
+          Text(value,
+              style: const TextStyle(fontWeight: FontWeight.w600)),
+        ],
       ),
     );
   }

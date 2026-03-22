@@ -29,6 +29,55 @@ class PlateDetectionEvent {
   final DateTime timestamp;
 }
 
+/// Payload emitted when the backend has automatically created a parking session
+/// from a camera detection. Contains all data needed to display a session card
+/// immediately, before the local DB syncs.
+class SessionCreatedEvent {
+
+  const SessionCreatedEvent({
+    required this.sessionId,
+    required this.licensePlate,
+    required this.confidence,
+    required this.vehicleSize,
+    required this.vehicleColor,
+    required this.spotNumber,
+    required this.entryTime,
+    required this.ratePerHour,
+    required this.timestamp,
+    this.imageUrl,
+  });
+
+  factory SessionCreatedEvent.fromJson(Map<String, dynamic> json) {
+    return SessionCreatedEvent(
+      sessionId: json['session_id'] as int,
+      licensePlate: json['license_plate'] as String,
+      confidence: json['confidence'] as String? ?? 'high',
+      vehicleSize: json['vehicle_size'] as String? ?? 'medium',
+      vehicleColor: json['vehicle_color'] as String? ?? 'unknown',
+      spotNumber: json['spot_number'] as String? ?? '',
+      entryTime: json['entry_time'] != null
+          ? DateTime.parse(json['entry_time'] as String)
+          : DateTime.now(),
+      ratePerHour: (json['rate_per_hour'] as num?)?.toDouble() ?? 0.0,
+      imageUrl: json['image_url'] as String?,
+      timestamp: json['timestamp'] != null
+          ? DateTime.parse(json['timestamp'] as String)
+          : DateTime.now(),
+    );
+  }
+
+  final int sessionId;
+  final String licensePlate;
+  final String confidence;
+  final String vehicleSize;
+  final String vehicleColor;
+  final String spotNumber;
+  final DateTime entryTime;
+  final double ratePerHour;
+  final String? imageUrl;
+  final DateTime timestamp;
+}
+
 /// Manages the WebSocket connection to the ALPR camera system.
 ///
 /// Security improvements over naive implementation:
@@ -40,6 +89,8 @@ class PlateDetectionEvent {
 class CameraWebSocketService {
   WebSocketChannel? _channel;
   final StreamController<PlateDetectionEvent> _plateController =
+      StreamController.broadcast();
+  final StreamController<SessionCreatedEvent> _sessionController =
       StreamController.broadcast();
   final StreamController<ConnectionStatus> _statusController =
       StreamController.broadcast();
@@ -57,6 +108,11 @@ class CameraWebSocketService {
 
   /// Stream of detected license plate events from the camera.
   Stream<PlateDetectionEvent> get plateStream => _plateController.stream;
+
+  /// Stream of fully-created session events from the backend.
+  /// Emitted when the AI backend automatically creates a session from a
+  /// camera detection, before the local DB sync completes.
+  Stream<SessionCreatedEvent> get sessionStream => _sessionController.stream;
 
   /// Stream of WebSocket connection status changes.
   Stream<ConnectionStatus> get statusStream => _statusController.stream;
@@ -133,6 +189,14 @@ class CameraWebSocketService {
           final event = PlateDetectionEvent.fromJson(payload);
           _plateController.add(event);
 
+        case 'session_created':
+          if (!_authenticated) return;
+          final payload = json['payload'];
+          if (payload is! Map<String, dynamic>) return;
+          if (!payload.containsKey('session_id')) return;
+          final event = SessionCreatedEvent.fromJson(payload);
+          _sessionController.add(event);
+
         case 'pong':
           // Heartbeat response — connection is alive
           break;
@@ -196,6 +260,7 @@ class CameraWebSocketService {
     _stopHeartbeat();
     _channel?.sink.close();
     _plateController.close();
+    _sessionController.close();
     _statusController.close();
   }
 }

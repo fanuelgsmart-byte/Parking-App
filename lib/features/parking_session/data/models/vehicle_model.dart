@@ -8,6 +8,7 @@ class VehicleModel {
     required this.size,
     required this.color,
     required this.createdAt,
+    this.imageUrl,
   });
 
   factory VehicleModel.fromJson(Map<String, dynamic> json) {
@@ -17,6 +18,7 @@ class VehicleModel {
       size: json['size'] as String,
       color: json['color'] as String,
       createdAt: DateTime.parse(json['created_at'] as String),
+      imageUrl: json['image_url'] as String?,
     );
   }
   final int id;
@@ -24,6 +26,7 @@ class VehicleModel {
   final String size;
   final String color;
   final DateTime createdAt;
+  final String? imageUrl;
 
   Map<String, dynamic> toJson() {
     return {
@@ -32,6 +35,7 @@ class VehicleModel {
       'size': size,
       'color': color,
       'created_at': createdAt.toIso8601String(),
+      'image_url': imageUrl,
     };
   }
 
@@ -45,6 +49,7 @@ class VehicleModel {
       ),
       color: color,
       createdAt: createdAt,
+      imageUrl: imageUrl,
     );
   }
 }

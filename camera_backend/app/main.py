@@ -11,7 +11,7 @@ from app.config import settings
 from app.database import create_tables
 
 # API routers
-from app.api import auth, camera_ingest, employees, lots, payments, rates, reports, sessions
+from app.api import auth, business, camera_ingest, employees, lots, payments, rates, reports, sessions
 from app.ws import camera_ws
 
 app = FastAPI(
@@ -42,6 +42,7 @@ app.mount("/images", StaticFiles(directory=str(images_dir)), name="images")
 # Routers
 # ---------------------------------------------------------------------------
 app.include_router(auth.router)
+app.include_router(business.router)
 app.include_router(sessions.router)
 app.include_router(lots.router)
 app.include_router(employees.router)

@@ -23,16 +23,19 @@ class CreateEmployeeRequest(BaseModel):
 @router.get("", response_model=list[EmployeeOut])
 def list_employees(
     db: Session = Depends(get_db),
-    _mgr: Employee = Depends(require_manager),
+    mgr: Employee = Depends(require_manager),
 ):
-    return db.query(Employee).filter(Employee.is_active.is_(True)).all()
+    q = db.query(Employee).filter(Employee.is_active.is_(True))
+    if mgr.business_id:
+        q = q.filter(Employee.business_id == mgr.business_id)
+    return q.all()
 
 
 @router.post("", response_model=EmployeeOut, status_code=status.HTTP_201_CREATED)
 def create_employee(
     body: CreateEmployeeRequest,
     db: Session = Depends(get_db),
-    _mgr: Employee = Depends(require_manager),
+    mgr: Employee = Depends(require_manager),
 ):
     if db.query(Employee).filter(Employee.email == body.email).first():
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Email already registered.")
@@ -41,6 +44,7 @@ def create_employee(
         email=body.email,
         password_hash=pwd_ctx.hash(body.password),
         role=body.role,
+        business_id=mgr.business_id,
         assigned_lot_id=body.assigned_lot_id,
     )
     db.add(emp)

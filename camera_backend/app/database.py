@@ -24,5 +24,5 @@ def get_db():
 
 def create_tables() -> None:
     """Create all tables on startup (simple alternative to Alembic for dev)."""
-    from app.models import vehicle, session, spot, lot, employee, rate, payment, camera_device  # noqa: F401
+    from app.models import business, vehicle, session, spot, lot, employee, rate, payment, camera_device  # noqa: F401
     Base.metadata.create_all(bind=engine)

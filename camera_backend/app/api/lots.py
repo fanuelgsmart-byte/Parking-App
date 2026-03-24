@@ -24,6 +24,7 @@ class SpotOut(BaseModel):
 
 class LotOut(BaseModel):
     id: str
+    business_id: str
     name: str
     address: str | None
 
@@ -31,8 +32,11 @@ class LotOut(BaseModel):
 
 
 @router.get("", response_model=list[LotOut])
-def list_lots(db: Session = Depends(get_db), _emp: Employee = Depends(get_current_employee)):
-    return db.query(ParkingLot).all()
+def list_lots(db: Session = Depends(get_db), emp: Employee = Depends(get_current_employee)):
+    q = db.query(ParkingLot)
+    if emp.business_id:
+        q = q.filter(ParkingLot.business_id == emp.business_id)
+    return q.all()
 
 
 @router.get("/{lot_id}/spots", response_model=list[SpotOut])

@@ -2,6 +2,23 @@
 
 part 'app_database.g.dart';
 
+@DataClassName('BusinessData')
+class Businesses extends Table {
+  TextColumn get id => text()();
+  TextColumn get name => text()();
+  TextColumn get ownerName => text()();
+  TextColumn get email => text()();
+  TextColumn get phone => text().nullable()();
+  TextColumn get address => text().nullable()();
+  // "camera_gate" or "manual"
+  TextColumn get operationMode => text().withDefault(const Constant('manual'))();
+  BoolColumn get isActive => boolean().withDefault(const Constant(true))();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
 @DataClassName('VehicleData')
 class Vehicles extends Table {
   IntColumn get id => integer().autoIncrement()();
@@ -82,6 +99,7 @@ class Employees extends Table {
   TextColumn get name => text()();
   TextColumn get email => text()();
   TextColumn get role => text()();
+  TextColumn get businessId => text().nullable()();
   TextColumn get assignedLotId => text().nullable()();
   BoolColumn get isActive => boolean().withDefault(const Constant(true))();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
@@ -137,6 +155,7 @@ class ReportCaches extends Table {
 }
 
 @DriftDatabase(tables: [
+  Businesses,
   Vehicles,
   CameraDevices,
   ParkingSpots,
@@ -152,7 +171,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase(super.e);
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration {
@@ -175,6 +194,10 @@ class AppDatabase extends _$AppDatabase {
         if (from < 3) {
           await m.addColumn(vehicles, vehicles.imageUrl);
           await m.createTable(cameraDevices);
+        }
+        if (from < 4) {
+          await m.createTable(businesses);
+          await m.addColumn(employees, employees.businessId);
         }
         await _createEnterpriseIndexes();
       },

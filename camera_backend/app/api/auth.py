@@ -9,7 +9,8 @@ from app.api.deps import get_current_employee, _decode_token
 from app.config import settings
 from app.database import get_db
 from app.models.employee import Employee
-from app.schemas.auth import EmployeeOut, LoginRequest, RefreshRequest, TokenResponse
+from app.models.business import Business
+from app.schemas.auth import EmployeeOut, LoginRequest, LoginResponse, RefreshRequest, TokenResponse, UserInfo
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 pwd_ctx = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -20,14 +21,39 @@ def _make_token(subject: int, expire_delta: timedelta) -> str:
     return jwt.encode({"sub": str(subject), "exp": expire}, settings.secret_key, algorithm=settings.algorithm)
 
 
-@router.post("/login", response_model=TokenResponse)
+@router.post("/login", response_model=LoginResponse)
 def login(body: LoginRequest, db: Session = Depends(get_db)):
     emp = db.query(Employee).filter(Employee.email == body.email, Employee.is_active.is_(True)).first()
     if emp is None or not pwd_ctx.verify(body.password, emp.password_hash):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials.")
     access = _make_token(emp.id, timedelta(minutes=settings.access_token_expire_minutes))
     refresh = _make_token(emp.id, timedelta(days=settings.refresh_token_expire_days))
-    return TokenResponse(access_token=access, refresh_token=refresh)
+
+    # Include business context
+    business_id = emp.business_id
+    operation_mode = None
+    if business_id:
+        biz = db.query(Business).filter(Business.id == business_id).first()
+        if biz:
+            operation_mode = biz.operation_mode
+
+    user_info = UserInfo(
+        id=str(emp.id),
+        name=emp.name,
+        email=emp.email,
+        role=emp.role,
+        business_id=business_id,
+        assigned_lot_id=emp.assigned_lot_id,
+        operation_mode=operation_mode,
+    )
+
+    return LoginResponse(
+        access_token=access,
+        refresh_token=refresh,
+        user=user_info,
+        business_id=business_id,
+        operation_mode=operation_mode,
+    )
 
 
 @router.post("/refresh", response_model=TokenResponse)

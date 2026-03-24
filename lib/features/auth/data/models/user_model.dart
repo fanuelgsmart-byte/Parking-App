@@ -6,7 +6,9 @@ class UserModel {
     required this.name,
     required this.email,
     required this.role,
+    this.businessId,
     this.assignedLotId,
+    this.operationMode,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
@@ -18,7 +20,9 @@ class UserModel {
         (value) => value.name == (json['role'] as String),
         orElse: () => UserRole.employee,
       ),
+      businessId: json['business_id'] as String?,
       assignedLotId: json['assigned_lot_id'] as String?,
+      operationMode: json['operation_mode'] as String?,
     );
   }
 
@@ -28,7 +32,9 @@ class UserModel {
       name: user.name,
       email: user.email,
       role: user.role,
+      businessId: user.businessId,
       assignedLotId: user.assignedLotId,
+      operationMode: user.operationMode,
     );
   }
 
@@ -36,7 +42,9 @@ class UserModel {
   final String name;
   final String email;
   final UserRole role;
+  final String? businessId;
   final String? assignedLotId;
+  final String? operationMode;
 
   Map<String, dynamic> toJson() {
     return {
@@ -44,7 +52,9 @@ class UserModel {
       'name': name,
       'email': email,
       'role': role.name,
+      'business_id': businessId,
       'assigned_lot_id': assignedLotId,
+      'operation_mode': operationMode,
     };
   }
 
@@ -54,7 +64,9 @@ class UserModel {
       name: name,
       email: email,
       role: role,
+      businessId: businessId,
       assignedLotId: assignedLotId,
+      operationMode: operationMode,
     );
   }
 }

@@ -5,22 +5,35 @@ typedef LotId = String;
 typedef SessionId = int;
 typedef EmployeeId = String;
 
+typedef BusinessId = String;
+
 class AppSessionContext extends Equatable {
   const AppSessionContext({
     required this.userId,
     required this.role,
     required this.assignedLotId,
+    this.businessId,
+    this.operationMode,
     this.selectedLotId,
   });
 
   final String userId;
   final UserRole role;
+  final BusinessId? businessId;
+  /// "manual" or "camera_gate"
+  final String? operationMode;
   final LotId? assignedLotId;
   final LotId? selectedLotId;
 
   LotId? get effectiveLotId => selectedLotId ?? assignedLotId;
 
   bool get hasLotAccess => effectiveLotId != null && effectiveLotId!.isNotEmpty;
+
+  bool get hasBusiness => businessId != null && businessId!.isNotEmpty;
+
+  bool get isCameraMode => operationMode == 'camera_gate';
+
+  bool get isManualMode => operationMode == 'manual' || operationMode == null;
 
   LotId requireLotId() {
     final lotId = effectiveLotId;
@@ -35,6 +48,8 @@ class AppSessionContext extends Equatable {
   AppSessionContext copyWith({
     String? userId,
     UserRole? role,
+    BusinessId? businessId,
+    String? operationMode,
     LotId? assignedLotId,
     LotId? selectedLotId,
     bool clearSelectedLotId = false,
@@ -42,6 +57,8 @@ class AppSessionContext extends Equatable {
     return AppSessionContext(
       userId: userId ?? this.userId,
       role: role ?? this.role,
+      businessId: businessId ?? this.businessId,
+      operationMode: operationMode ?? this.operationMode,
       assignedLotId: assignedLotId ?? this.assignedLotId,
       selectedLotId:
           clearSelectedLotId ? null : selectedLotId ?? this.selectedLotId,
@@ -49,7 +66,8 @@ class AppSessionContext extends Equatable {
   }
 
   @override
-  List<Object?> get props => [userId, role, assignedLotId, selectedLotId];
+  List<Object?> get props =>
+      [userId, role, businessId, operationMode, assignedLotId, selectedLotId];
 }
 
 class MissingSessionContextException implements Exception {

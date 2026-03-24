@@ -57,4 +57,7 @@ class ApiConstants {
   static const String cameraDevices = '/camera/devices';
   static const String cameraFrame = '/camera/frame';
   static const String cameraWebSocket = '$wsBaseUrl/camera';
+
+  static const String businessRegister = '/businesses/register';
+  static const String businessMe = '/businesses/me';
 }

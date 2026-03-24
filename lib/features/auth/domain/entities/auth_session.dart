@@ -26,6 +26,8 @@ class AuthSession extends Equatable {
   AppSessionContext get context => AppSessionContext(
         userId: user.id,
         role: user.role,
+        businessId: user.businessId,
+        operationMode: user.operationMode,
         assignedLotId: user.assignedLotId,
       );
 

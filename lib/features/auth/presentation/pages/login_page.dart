@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:parkflow_manager/core/constants/app_constants.dart';
 import 'package:parkflow_manager/core/theme/app_theme.dart';
 import 'package:parkflow_manager/core/utils/validators.dart';
@@ -177,7 +178,17 @@ class _LoginPageState extends State<LoginPage>
                               );
                             },
                           ),
-                          const SizedBox(height: 24),
+                          const SizedBox(height: 16),
+                          // Register link
+                          Center(
+                            child: TextButton(
+                              onPressed: () => context.go('/register'),
+                              child: const Text(
+                                'Register your business',
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
                           // Footer
                           Center(
                             child: Text(

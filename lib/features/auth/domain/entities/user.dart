@@ -10,7 +10,9 @@ abstract class User with _$User {
     required String name,
     required String email,
     required UserRole role,
+    String? businessId,
     String? assignedLotId,
+    String? operationMode,
   }) = _User;
 
   factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);

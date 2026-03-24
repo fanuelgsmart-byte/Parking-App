@@ -6,6 +6,10 @@ import 'package:parkflow_manager/features/auth/domain/entities/user.dart';
 import 'package:parkflow_manager/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:parkflow_manager/features/auth/presentation/bloc/auth_state.dart';
 import 'package:parkflow_manager/features/auth/presentation/pages/login_page.dart';
+import 'package:parkflow_manager/features/auth/presentation/pages/register_business_page.dart';
+import 'package:parkflow_manager/features/auth/presentation/bloc/register_cubit.dart';
+import 'package:parkflow_manager/core/network/api_client.dart';
+import 'package:parkflow_manager/features/auth/data/datasources/auth_local_datasource.dart';
 import 'package:parkflow_manager/features/camera_management/presentation/bloc/camera_cubit.dart';
 import 'package:parkflow_manager/features/camera_management/presentation/pages/camera_management_page.dart';
 import 'package:parkflow_manager/features/camera_management/presentation/pages/camera_pair_page.dart';
@@ -34,6 +38,19 @@ class AppRouter {
         path: '/login',
         name: 'login',
         builder: (context, state) => const LoginPage(),
+      ),
+      GoRoute(
+        path: '/register',
+        name: 'register',
+        builder: (context, state) {
+          return BlocProvider(
+            create: (_) => RegisterCubit(
+              apiClient: _serviceLocator<ApiClient>(),
+              localDataSource: _serviceLocator<AuthLocalDataSource>(),
+            ),
+            child: const RegisterBusinessPage(),
+          );
+        },
       ),
       GoRoute(
         path: '/employee',
@@ -143,12 +160,14 @@ class AppRouter {
     final authState = authBloc.state;
     final location = state.matchedLocation;
     final isOnLogin = location == '/login';
+    final isOnRegister = location == '/register';
+    final isPublic = isOnLogin || isOnRegister;
 
-    if (authState is AuthUnauthenticated && !isOnLogin) {
+    if (authState is AuthUnauthenticated && !isPublic) {
       return '/login';
     }
 
-    if (authState is AuthAuthenticated && isOnLogin) {
+    if (authState is AuthAuthenticated && isPublic) {
       return authState.user.role == UserRole.manager ? '/manager' : '/employee';
     }
 

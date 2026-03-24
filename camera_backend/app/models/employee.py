@@ -16,6 +16,9 @@ class Employee(Base):
     email: Mapped[str] = mapped_column(String(254), unique=True, nullable=False)
     password_hash: Mapped[str] = mapped_column(String(256), nullable=False)
     role: Mapped[str] = mapped_column(String(20), default="employee")  # employee / manager
+    business_id: Mapped[str | None] = mapped_column(
+        String(36), ForeignKey("businesses.id"), nullable=True, index=True
+    )
     assigned_lot_id: Mapped[str | None] = mapped_column(
         String(36), ForeignKey("parking_lots.id"), nullable=True, index=True
     )
@@ -24,5 +27,6 @@ class Employee(Base):
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
     )
 
+    business = relationship("Business", back_populates="employees")
     lot = relationship("ParkingLot", back_populates="employees")
     sessions = relationship("ParkingSession", back_populates="employee")
